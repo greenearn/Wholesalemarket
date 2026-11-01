@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#06070d">
+<title>Wholesale Market Worldwide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#06070d; --ink2:#0a0c16; --ink3:#0f1220;
+  --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.075);
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --txt:#f4f5fb; --dim:#9aa2b8; --dim2:#6b7385;
+  --gold:#f5c96b; --gold2:#e2a94b; --vio:#8b5cf6; --cyan:#22d3ee; --mint:#34d399; --rose:#fb7185;
+  --grad:linear-gradient(135deg,#f5c96b 0%,#f0a45b 35%,#8b5cf6 100%);
+  --grad2:linear-gradient(120deg,#8b5cf6,#22d3ee);
+  --sh:0 18px 45px -18px rgba(0,0,0,.85);
+  --r:20px; --r2:14px;
+  --safe:env(safe-area-inset-bottom,0px);
+}
+html[data-theme=light]{
+  --ink:#f6f7fb; --ink2:#ffffff; --ink3:#eef0f7;
+  --card:rgba(255,255,255,.92); --card2:#ffffff;
+  --line:rgba(12,16,32,.09); --line2:rgba(12,16,32,.16);
+  --txt:#0d1220; --dim:#5a6376; --dim2:#8b93a5;
+  --sh:0 18px 40px -22px rgba(14,20,40,.35);
+}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:'Sora','Noto Sans SC',system-ui,-apple-system,sans-serif;
+  background:var(--ink); color:var(--txt); overflow-x:hidden;
+  font-size:15px; line-height:1.5; letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(86px + var(--safe));
+}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+#bg .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:float 22s ease-in-out infinite}
+#bg .o1{width:340px;height:340px;left:-120px;top:-80px;background:radial-gradient(circle,#8b5cf6,transparent 70%)}
+#bg .o2{width:300px;height:300px;right:-110px;top:120px;background:radial-gradient(circle,#22d3ee,transparent 70%);animation-delay:-6s}
+#bg .o3{width:380px;height:380px;left:20%;bottom:-160px;background:radial-gradient(circle,#f5c96b,transparent 70%);opacity:.32;animation-delay:-12s}
+#bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(circle at 50% 0%,#000 0%,transparent 75%)}
+@keyframes float{0%,100%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(30px,-26px,0) scale(1.08)}66%{transform:translate3d(-24px,18px,0) scale(.95)}}
+@keyframes fadeUp{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.94);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes shimmer{0%{background-position:-420px 0}100%{background-position:420px 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translate3d(0,100%,0)}to{transform:translate3d(0,0,0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes ripple{to{transform:scale(2.6);opacity:0}}
+.wrap{position:relative;z-index:2;max-width:620px;margin:0 auto;padding:0 16px}
+header#top{position:sticky;top:0;z-index:40;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);background:linear-gradient(180deg,rgba(6,7,13,.92),rgba(6,7,13,.55));border-bottom:1px solid var(--line)}
+html[data-theme=light] header#top{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.7))}
+.topin{max-width:620px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:15px;color:#120b02;box-shadow:0 8px 22px -10px rgba(245,201,107,.9);flex:none;position:relative;overflow:hidden}
+.logo::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);transform:translateX(-120%);animation:shimmer 4.5s infinite}
+.bname{font-weight:700;font-size:14px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{font-size:10.5px;color:var(--dim2);letter-spacing:.14em;text-transform:uppercase}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);display:grid;place-items:center;font-size:15px;cursor:pointer;transition:.22s;flex:none}
+.iconbtn:active{transform:scale(.92)}
+.pill{border:1px solid var(--line2);background:var(--card);color:var(--txt);border-radius:100px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s;flex:none}
+.pill:active{transform:scale(.95)}
+#ticker{overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(139,92,246,.12),rgba(34,211,238,.1),rgba(245,201,107,.12));position:relative;z-index:3}
+#ticker .tk{display:flex;width:max-content;animation:marq 34s linear infinite;gap:34px;padding:8px 0;font-size:11.5px;color:var(--dim);letter-spacing:.04em}
+#ticker .tk b{color:var(--txt)}
+main{position:relative;z-index:2;padding:18px 0 8px;animation:fadeIn .3s ease}
+section{animation:fadeUp .5s cubic-bezier(.2,.7,.3,1) both}
+.kicker{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin:0 0 6px}
+h1{font-size:27px;line-height:1.18;margin:0 0 10px;font-weight:800;letter-spacing:-.03em}
+h1 .glow{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:18px;margin:0 0 4px;font-weight:700;letter-spacing:-.02em}
+h3{font-size:14.5px;margin:0 0 8px;font-weight:700}
+p{margin:0 0 12px;color:var(--dim);font-size:13.5px;line-height:1.62}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.card.glowline::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,201,107,.8),transparent)}
+.hero{padding:22px 18px;border-radius:26px;background:linear-gradient(160deg,rgba(139,92,246,.22),rgba(34,211,238,.08) 45%,rgba(245,201,107,.14));border:1px solid var(--line2);position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;width:220px;height:220px;right:-70px;top:-70px;border-radius:50%;background:radial-gradient(circle,rgba(245,201,107,.5),transparent 70%);filter:blur(28px);animation:pulse 6s ease-in-out infinite}
+.hero .cta{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+.btn{border:0;border-radius:14px;padding:13px 18px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .16s,box-shadow .24s,filter .24s;position:relative;overflow:hidden}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--grad);color:#140c02;box-shadow:0 14px 30px -14px rgba(245,201,107,.85)}
+.btn.vio{background:var(--grad2);color:#04121a;box-shadow:0 14px 30px -14px rgba(139,92,246,.9)}
+.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line2)}
+.btn.wide{width:100%}
+.btn.sm{padding:9px 13px;font-size:12px;border-radius:11px}
+.btn .rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);pointer-events:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:13px 12px;text-align:center}
+.stat b{display:block;font-size:18px;font-weight:800;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:10.5px;color:var(--dim2);letter-spacing:.06em;text-transform:uppercase}
+.sec{margin:26px 0 12px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.sec .more{font-size:12px;color:var(--gold);font-weight:600;cursor:pointer;white-space:nowrap}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line2);background:var(--card);color:var(--dim);border-radius:100px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.chip.on{background:var(--grad);color:#140c02;border-color:transparent;box-shadow:0 10px 24px -14px rgba(245,201,107,.9)}
+.cat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 12px;cursor:pointer;transition:.26s cubic-bezier(.2,.7,.3,1);position:relative;overflow:hidden;animation:fadeUp .45s both}
+.cat:active{transform:scale(.96)}
+.cat .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(34,211,238,.16));border:1px solid var(--line2);margin-bottom:9px}
+.cat .nm{font-size:12.5px;font-weight:700;line-height:1.28;letter-spacing:-.01em}
+.cat .ct{font-size:10.5px;color:var(--dim2);margin-top:3px}
+.cat:hover{border-color:rgba(245,201,107,.45);transform:translateY(-3px);box-shadow:0 20px 40px -26px rgba(245,201,107,.7)}
+.prod{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:11px;cursor:pointer;transition:.24s;animation:fadeUp .45s both;align-items:center}
+.prod:active{transform:scale(.98)}
+.prod:hover{border-color:rgba(34,211,238,.4);transform:translateY(-2px)}
+.prod .thumb{width:62px;height:62px;border-radius:14px;flex:none;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(34,211,238,.2));border:1px solid var(--line2);position:relative;overflow:hidden}
+.prod .thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.25) 50%,transparent 60%);transform:translateX(-120%);animation:shimmer 5s infinite}
+.prod .nm{font-size:13px;font-weight:700;line-height:1.25;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod .mt{font-size:11px;color:var(--dim2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.02em}
+.tag.ok{background:rgba(52,211,153,.16);color:#5eead4}
+.tag.low{background:rgba(245,201,107,.16);color:var(--gold)}
+.tag.out{background:rgba(251,113,133,.16);color:#fda4af}
+.price{margin-left:auto;text-align:right;flex:none}
+.price b{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.price s{font-size:10.5px;color:var(--dim2)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .lbl{font-size:12.5px;color:var(--dim)}
+.row .val{font-size:13px;font-weight:700}
+.inp{width:100%;background:var(--ink3);border:1px solid var(--line2);color:var(--txt);border-radius:13px;padding:13px 14px;font-family:inherit;font-size:14px;outline:none;transition:.2s;margin-bottom:10px}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,201,107,.14)}
+label.fl{display:block;font-size:11px;color:var(--dim2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;scrollbar-width:none;margin-bottom:14px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:8px 13px;border-radius:10px;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;transition:.2s;white-space:nowrap}
+.tab.on{background:var(--grad);color:#140c02}
+.sheetbd{position:fixed;inset:0;background:rgba(3,4,10,.72);backdrop-filter:blur(6px);z-index:90;animation:fadeIn .22s;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:620px;background:linear-gradient(180deg,var(--ink2),var(--ink));border:1px solid var(--line2);border-bottom:0;border-radius:26px 26px 0 0;padding:18px 18px calc(24px + var(--safe));animation:slideUp .32s cubic-bezier(.2,.7,.3,1);max-height:88vh;overflow-y:auto;box-shadow:0 -20px 60px rgba(0,0,0,.6)}
+.sheet .bar{width:42px;height:4px;border-radius:4px;background:var(--line2);margin:0 auto 14px}
+.sheet h3{font-size:17px;margin-bottom:4px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(104px + var(--safe));z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:92%;max-width:420px}
+.tst{background:rgba(16,20,34,.97);border:1px solid var(--line2);color:#fff;padding:11px 16px;border-radius:13px;font-size:12.5px;font-weight:600;box-shadow:0 18px 40px -18px #000;animation:pop .26s;display:flex;gap:8px;align-items:center;width:100%}
+.tst.ok{border-color:rgba(52,211,153,.55)} .tst.err{border-color:rgba(251,113,133,.55)}
+nav#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:7px 8px calc(7px + var(--safe));background:linear-gradient(180deg,rgba(6,7,13,.4),rgba(6,7,13,.97) 45%);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--line)}
+html[data-theme=light] nav#tabbar{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.98) 45%)}
+.tabsIn{display:flex;max-width:620px;margin:0 auto;justify-content:space-around}
+.tb{border:0;background:none;color:var(--dim2);font-family:inherit;font-size:9.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 6px;cursor:pointer;transition:.2s;position:relative;flex:1;letter-spacing:.02em}
+.tb i{font-size:19px;font-style:normal;line-height:1;transition:transform .26s cubic-bezier(.2,.9,.3,1.4)}
+.tb.on{color:var(--gold)}
+.tb.on i{transform:translateY(-3px) scale(1.12)}
+.tb.on::after{content:'';position:absolute;bottom:-1px;width:18px;height:2.5px;border-radius:4px;background:var(--grad)}
+.sk{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.11) 37%,rgba(255,255,255,.05) 63%);background-size:420px 100%;animation:shimmer 1.3s infinite;border-radius:12px}
+.av{width:44px;height:44px;border-radius:14px;background:var(--grad);display:grid;place-items:center;font-weight:800;color:#140c02;font-size:17px;flex:none}
+.banner{display:flex;gap:11px;align-items:center;padding:13px;border-radius:16px;background:linear-gradient(120deg,rgba(139,92,246,.18),rgba(34,211,238,.1));border:1px solid var(--line2)}
+.banner .ic{font-size:22px}
+.banner b{font-size:12.5px;display:block}
+.banner span{font-size:11px;color:var(--dim)}
+.steps{counter-reset:s}
+.step{display:flex;gap:11px;margin-bottom:13px;animation:fadeUp .5s both}
+.step .n{width:26px;height:26px;border-radius:9px;background:var(--card2);border:1px solid var(--line2);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--gold);flex:none}
+.step b{font-size:12.5px;display:block;margin-bottom:2px}
+.step p{margin:0;font-size:11.5px;line-height:1.5}
+.mini{font-size:11px;color:var(--dim2)}
+.center{text-align:center}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;word-break:break-all}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim);cursor:pointer;margin-bottom:12px;font-weight:600}
+.back:active{opacity:.6}
+.badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:100px;background:rgba(245,201,107,.16);color:var(--gold)}
+.red{color:#fda4af} .grn{color:#5eead4}
+.split{display:flex;gap:9px} .split>*{flex:1}
+.thumbbig{width:100%;height:150px;border-radius:18px;background:linear-gradient(140deg,rgba(139,92,246,.4),rgba(34,211,238,.22),rgba(245,201,107,.3));display:grid;place-items:center;font-size:48px;margin-bottom:14px;position:relative;overflow:hidden;border:1px solid var(--line2)}
+.thumbbig::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.22) 50%,transparent 60%);transform:translateX(-120%);animation:shimmer 4s infinite}
+.qty{display:flex;align-items:center;gap:0;border:1px solid var(--line2);border-radius:13px;overflow:hidden;width:max-content;background:var(--ink3)}
+.qty button{width:42px;height:42px;border:0;background:none;color:var(--txt);font-size:19px;cursor:pointer;font-family:inherit}
+.qty span{min-width:46px;text-align:center;font-weight:800;font-size:15px}
+.empty{text-align:center;padding:34px 16px;color:var(--dim2)}
+.empty .e{font-size:38px;display:block;margin-bottom:10px;animation:pulse 3s infinite}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
+
+<header id="top">
+  <div class="topin">
+    <div class="brand">
+      <div class="logo">WM</div>
+      <div style="min-width:0">
+        <div class="bname" data-i18n="brand">Wholesale Market</div>
+        <div class="bsub" data-i18n="brandsub">worldwide · 全球</div>
+      </div>
+    </div>
+    <button class="pill" id="langBtn" onclick="toggleLang()"><span id="langLbl">EN</span> 🌐</button>
+    <button class="pill" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+
+<div id="ticker"><div class="tk" id="tkInner"></div></div>
+
+<main class="wrap" id="view"></main>
+
+<nav id="tabbar"><div class="tabsIn">
+  <button class="tb" data-tab="home" onclick="go('home')"><i>🏠</i><span data-i18n="tHome">Home</span></button>
+  <button class="tb" data-tab="market" onclick="go('market')"><i>🛍</i><span data-i18n="tMarket">Market</span></button>
+  <button class="tb" data-tab="wallet" onclick="go('wallet')"><i>💰</i><span data-i18n="tWallet">Wallet</span></button>
+  <button class="tb" data-tab="orders" onclick="go('orders')"><i>📦</i><span data-i18n="tOrders">Orders</span></button>
+  <button class="tb" data-tab="profile" onclick="go('profile')"><i>👤</i><span data-i18n="tProfile">Profile</span></button>
+</div></nav>
+
+<div id="toast"></div>
+<div id="modal"></div>
+
+<script>
+/* ============ i18n: every visible word, EN + 中文 ============ */
+const I18N = {
+en:{
+ brand:"Wholesale Market", brandsub:"worldwide · 全球",
+ tHome:"Home", tMarket:"Market", tWallet:"Wallet", tOrders:"Orders", tProfile:"Profile",
+ heroKicker:"Trusted digital wholesale",
+ heroTitle:"Everything you need,<br><span class='glow'>delivered in minutes.</span>",
+ heroSub:"Verified accounts, gift cards, software, AI, cloud tools and custom builds — one marketplace, worldwide delivery, real support.",
+ browse:"Browse marketplace", signup:"Create account",
+ statCats:"Categories", statItems:"Products", statDelivery:"Delivery", statSupport:"Support",
+ feats:"Why buy here", latest:"Latest arrivals", cats:"All categories", viewAll:"View all",
+ company:"Our company", companyTxt:"Wholesale Market Worldwide is an international digital goods supplier. We have been sourcing verified accounts, subscriptions, software and data services for resellers, agencies and creators since day one. Every order is checked by a human before it leaves, and every product page states exactly what you receive, how fast, and what warranty comes with it.",
+ companyP1:"Curated stock — only sellers whose supply we can verify stay listed.",
+ companyP2:"Human delivery — when something needs a hand, a real person handles it.",
+ companyP3:"Fair pricing — wholesale rates, with reseller markups supported.",
+ support:"Customer support", supportTxt:"Replies in English and 中文, usually within a few hours, 24/7 inbox.",
+ contactSupport:"Contact support", referral:"Refer & earn", referralTxt:"Share your link. When your friends buy, you earn a commission on every order — straight into your wallet, withdrawable any time.",
+ yourLink:"Your link", copy:"Copy", copied:"Copied to clipboard",
+ howItWorks:"How it works", step1:"Share your link", step1d:"Send it to friends, groups or your channel.",
+ step2:"They sign up", step2d:"Your link is remembered on their account.",
+ step3:"You earn", step3d:"A commission lands in your wallet on every order.",
+ market:"Marketplace", marketSub:"Pick a category, open a product, choose a quantity.",
+ search:"Search products…", all:"All", inStock:"in stock", soldOut:"Sold out", lowStock:"Only {n} left",
+ back:"Back", subcats:"Sub-categories", items:"Products", noItems:"Nothing here yet. The admin is adding products — ask support for a custom order.",
+ product:"Product", price:"Price", stock:"Stock", delivery:"Delivery", quantity:"Quantity", total:"Total",
+ buyNow:"Buy now", notEnough:"Not enough balance — you need {n} more.", depositFirst:"Deposit funds",
+ details:"Details", warranty:"Warranty", instant:"Instant delivery", yourBalance:"Your balance",
+ login:"Log in", logout:"Log out", signupTitle:"Create your account", loginTitle:"Welcome back",
+ email:"Email", name:"Full name", password:"Password", lang:"Language",
+ haveAccount:"Already have an account? Log in", noAccount:"New here? Create an account",
+ signupOk:"Account created", loginOk:"Logged in", logoutOk:"Logged out",
+ loginReq:"Log in to buy, deposit or withdraw", loggedInAs:"Signed in as",
+ wallet:"Wallet", balance:"Balance", available:"Available", deposit:"Deposit", withdraw:"Withdraw",
+ earnings:"Referral earnings", refs:"Referrals", depositTitle:"Deposit funds",
+ depositSub:"Automatic crypto deposits are checked by the bot itself — your balance updates the moment the payment confirms.",
+ depositManual:"Manual deposit", depositManualTxt:"Send the amount, coin and transaction hash to support and the admin credits you after checking.",
+ txs:"Transactions", noTx:"No transactions yet.",
+ withdrawTitle:"Withdraw", withdrawSub:"Send crypto or a bank account. The admin reviews and pays out.", address:"Address / account",
+ amount:"Amount", minWithdraw:"Minimum {n}", requestWithdraw:"Request withdrawal",
+ withdrawOk:"Request sent — the admin will pay it out.", tooSmall:"Minimum is {n}", noBalance:"Nothing to withdraw.",
+ orders:"My orders", noOrders:"You have no orders yet.", orderId:"Order", status:"Status",
+ st_pending:"Being prepared", st_completed:"Completed", st_cancelled:"Cancelled", st_processing:"Processing",
+ supportMsg:"Waiting for delivery? Contact support with your order number.",
+ profile:"Profile", settings:"Settings", theme:"Theme", dark:"Dark", light:"Light",
+ reseller:"Reseller", resellerTxt:"You are a sub-admin. Add your own profit on top of the shop price — your customers see your price, everyone else sees the original.",
+ markup:"Markup %", save:"Save", saved:"Saved", admin:"Admin panel",
+ adminTxt:"You are an administrator. Open the admin panel inside the bot for full control.",
+ openBot:"Open bot", memberSince:"Member since", id:"ID",
+ logoutWarn:"Log out of this device?", yes:"Yes", no:"Cancel",
+ loading:"Loading…", offline:"Offline mode — your data is stored on this device only. Connect the bot backend to sync balances.",
+ online:"Connected", empty:"Nothing to show yet.",
+ buyOk:"Order placed — check your orders.", buyFail:"Could not complete the purchase.",
+ qty:"×", left:"left", depositAmount:"Amount in USD", method:"Method",
+ chatSupport:"Chat with support", copyAddr:"Tap to copy", passwordHint:"At least 4 characters",
+ required:"Please fill every field", emailBad:"That email does not look right",
+ hi:"Hi", welcomeBack:"Welcome back",
+ newArrivals:"New arrivals", bestValue:"Best value", trust:"Trusted by resellers worldwide"
+},
+cn:{
+ brand:"批发市场", brandsub:"全球 · worldwide",
+ tHome:"首页", tMarket:"市场", tWallet:"钱包", tOrders:"订单", tProfile:"我的",
+ heroKicker:"值得信赖的数字批发",
+ heroTitle:"所需的一切，<br><span class='glow'>几分钟内交付。</span>",
+ heroSub:"认证账号、礼品卡、软件、AI、云工具与定制开发 —— 一个市场，全球交付，真人客服。",
+ browse:"浏览市场", signup:"注册账号",
+ statCats:"分类", statItems:"商品", statDelivery:"交付", statSupport:"客服",
+ feats:"为什么选择我们", latest:"最新上架", cats:"全部分类", viewAll:"查看全部",
+ company:"关于我们", companyTxt:"批发市场（Wholesale Market Worldwide）是国际数字商品供应商，长期为代理商、工作室与创作者提供认证账号、订阅、软件与数据服务。每笔订单都会经人工核验，每个商品页都会写明你将收到什么、多快交付、以及质保内容。",
+ companyP1:"精选货源 —— 只保留可验证的供应渠道。",
+ companyP2:"人工交付 —— 需要协助时，由真人处理。",
+ companyP3:"价格公道 —— 批发价，支持代理加价。",
+ support:"客服支持", supportTxt:"中英文回复，通常数小时内响应，全天收消息。",
+ contactSupport:"联系客服", referral:"推荐返佣", referralTxt:"分享你的链接，好友下单后你可获得订单佣金，直接进入钱包，随时提现。",
+ yourLink:"你的专属链接", copy:"复制", copied:"已复制到剪贴板",
+ howItWorks:"如何运作", step1:"分享链接", step1d:"发送给好友、群组或频道。",
+ step2:"好友注册", step2d:"链接会记在他们的账号上。",
+ step3:"开始赚取", step3d:"每笔订单佣金直接进钱包。",
+ market:"市场", marketSub:"选择分类，打开商品，选择数量。",
+ search:"搜索商品…", all:"全部", inStock:"有货", soldOut:"已售罄", lowStock:"仅剩 {n} 件",
+ back:"返回", subcats:"子分类", items:"商品", noItems:"这里还没有商品，管理员正在添加。需要定制请咨询客服。",
+ product:"商品", price:"价格", stock:"库存", delivery:"交付", quantity:"数量", total:"合计",
+ buyNow:"立即购买", notEnough:"余额不足，还需 {n}。", depositFirst:"去充值",
+ details:"商品详情", warranty:"质保", instant:"即时交付", yourBalance:"你的余额",
+ login:"登录", logout:"退出登录", signupTitle:"创建账号", loginTitle:"欢迎回来",
+ email:"邮箱", name:"姓名", password:"密码", lang:"语言",
+ haveAccount:"已有账号？登录", noAccount:"还没有账号？注册",
+ signupOk:"账号已创建", loginOk:"已登录", logoutOk:"已退出登录",
+ loginReq:"登录后才能购买、充值或提现", loggedInAs:"当前登录",
+ wallet:"钱包", balance:"余额", available:"可用", deposit:"充值", withdraw:"提现",
+ earnings:"返佣收益", refs:"推荐人数", depositTitle:"账户充值",
+ depositSub:"自动加密货币充值由机器人自行核对，付款确认后余额立即更新。",
+ depositManual:"手动充值", depositManualTxt:"联系客服发送金额、币种与交易号，管理员核对后为你入账。",
+ txs:"交易记录", noTx:"暂无交易记录。",
+ withdrawTitle:"提现", withdrawSub:"填写地址或银行账户，管理员审核后打款。", address:"地址 / 账户",
+ amount:"金额", minWithdraw:"最低 {n}", requestWithdraw:"申请提现",
+ withdrawOk:"申请已提交，管理员将尽快打款。", tooSmall:"最低金额为 {n}", noBalance:"没有可提现余额。",
+ orders:"我的订单", noOrders:"你还没有订单。", orderId:"订单号", status:"状态",
+ st_pending:"准备中", st_completed:"已完成", st_cancelled:"已取消", st_processing:"处理中",
+ supportMsg:"等待交付？请带上订单号联系客服。",
+ profile:"个人中心", settings:"设置", theme:"主题", dark:"深色", light:"浅色",
+ reseller:"代理", resellerTxt:"你是子管理员，可在市场价上加价。你的客户看到你的价格，其他人看到原价。",
+ markup:"加价 %", save:"保存", saved:"已保存", admin:"管理面板",
+ adminTxt:"你是管理员，可在机器人内打开管理面板进行完整操作。",
+ openBot:"打开机器人", memberSince:"注册于", id:"编号",
+ logoutWarn:"确定要退出当前设备吗？", yes:"确定", no:"取消",
+ loading:"加载中…", offline:"离线模式 —— 数据仅保存在本设备。连接机器人后台后可同步余额。",
+ online:"已连接", empty:"暂无内容。",
+ buyOk:"下单成功，请查看订单。", buyFail:"购买失败。",
+ qty:"×", left:"剩余", depositAmount:"充值金额（USD）", method:"支付方式",
+ chatSupport:"联系客服", copyAddr:"点击复制", passwordHint:"至少 4 位字符",
+ required:"请填写所有字段", emailBad:"邮箱格式不正确",
+ hi:"你好", welcomeBack:"欢迎回来",
+ newArrivals:"新品上架", bestValue:"超值推荐", trust:"全球代理商信赖"
+}};
+let LANG = (function(){
+  const saved = localStorage.getItem('wm_lang');
+  if(saved === 'cn' || saved === 'en') return saved;
+  let lc = '';
+  try{ lc = (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user && Telegram.WebApp.initDataUnsafe.user.language_code) || ''; }catch(e){}
+  return lc.indexOf('zh') === 0 ? 'cn' : 'en';
+})();
+function t(k, vars){ let s = (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; if(vars){ for(const p in vars) s = s.split('{'+p+'}').join(vars[p]); } return s; }
+function toggleLang(){ LANG = LANG === 'en' ? 'cn' : 'en'; localStorage.setItem('wm_lang', LANG); applyI18n(); render(); toast(LANG==='cn'?'已切换为中文':'Switched to English','ok'); }
+function applyI18n(){ document.documentElement.lang = LANG === 'cn' ? 'zh-CN' : 'en'; document.getElementById('langLbl').textContent = LANG === 'cn' ? '中文' : 'EN'; document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); }); }
+function toggleTheme(){ const h=document.documentElement; const n = h.getAttribute('data-theme')==='dark'?'light':'dark'; h.setAttribute('data-theme',n); localStorage.setItem('wm_theme',n); document.getElementById('themeBtn').textContent = n==='dark'?'🌙':'☀️'; }
+</script>
+
+<script>
+/* ============ CONFIG — set at export time if you host centrally ============ */
+const CFG = {
+  API: window.WM_API || "",   /* fill in to enable cloud sync, empty = offline */
+  BOT: "wholesalemarketworldwideV2bot",
+  SUPPORT: "support",
+  CURRENCY: "USD",
+  REF_PERCENT: 10,
+  MIN_WITHDRAW: 5.0,
+  PAY_SITE: "https://my.2328.io"
+};
+
+/* ============ helpers ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money = n => '$' + (Math.round((Number(n)||0)*100)/100).toFixed(2);
+const uid = () => 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const today = () => new Date().toISOString().slice(0,10);
+const ls = {
+  get(k, d){ try{ const v = localStorage.getItem('wm_'+k); return v==null? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('wm_'+k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem('wm_'+k); }catch(e){} }
+};
+function haptic(style){ try{ Telegram.WebApp.HapticFeedback.impactOccurred(style||'light'); }catch(e){} }
+function toast(msg, kind){
+  const box = $('#toast'); const el = document.createElement('div');
+  el.className = 'tst ' + (kind||'');
+  el.innerHTML = '<span>' + (kind==='ok'?'✅':kind==='err'?'⚠️':'ℹ️') + '</span><span>' + esc(msg) + '</span>';
+  box.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s,transform .3s'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),320); }, 2600);
+}
+function copy(text){
+  try{ navigator.clipboard.writeText(text); }catch(e){}
+  toast(t('copied'),'ok');
+}
+function sheet(html){
+  $('#modal').innerHTML = '<div class="sheetbd" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="bar"></div>' + html + '</div></div>';
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(){ $('#modal').innerHTML=''; document.body.style.overflow=''; }
+
+/* ============ STATE ============ */
+const TG_USER = (function(){
+  try{ return Telegram.WebApp.initDataUnsafe.user || null; }catch(e){ return null; }
+})();
+const S = {
+  user: ls.get('user', null),
+  balance: Number(ls.get('balance', 0)) || 0,
+  earnings: Number(ls.get('earnings', 0)) || 0,
+  refs: Number(ls.get('refs', 0)) || 0,
+  orders: ls.get('orders', []),
+  txs: ls.get('txs', []),
+  withdrawals: ls.get('withdrawals', []),
+  markup: Number(ls.get('markup', 0)) || 0,
+  cats: ls.get('cats', null),
+  items: ls.get('items', null),
+  online: false
+};
+function persist(){
+  ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
+  ls.set('refs', S.refs); ls.set('orders', S.orders); ls.set('txs', S.txs);
+  ls.set('withdrawals', S.withdrawals); ls.set('markup', S.markup);
+  ls.set('cats', S.cats); ls.set('items', S.items);
+}
+
+/* ============ CATALOG (default seed — mirrors the bot's /seed) ============ */
+const SEED_CATS = [
+ {id:'telegram',icon:'✈️',en:'Telegram Services',cn:'Telegram 服务',desc_en:'Premium, members, accounts, boosts — delivered instantly.',desc_cn:'会员、粉丝、账号、助力，即时交付。',subs:[{id:'tg-premium',en:'Telegram Premium',cn:'Telegram 会员'},{id:'tg-members',en:'Members & Followers',cn:'粉丝与成员'},{id:'tg-accounts',en:'Aged Accounts',cn:'账号出售'},{id:'tg-boost',en:'Boosts & Stars',cn:'助力与星星'}]},
+ {id:'whatsapp',icon:'💬',en:'WhatsApp Services',cn:'WhatsApp 服务',desc_en:'Business accounts, green tick, bulk sender tools.',desc_cn:'商业账号、绿标认证、群发工具。',subs:[{id:'wa-accounts',en:'Business Accounts',cn:'商业账号'},{id:'wa-verify',en:'Verification & Green Tick',cn:'认证与绿标'},{id:'wa-tools',en:'Bulk Sender Tools',cn:'群发工具'}]},
+ {id:'giftcards',icon:'🎁',en:'Gift Cards',cn:'礼品卡',desc_en:'Steam, iTunes, Google Play, Amazon, PSN and more.',desc_cn:'Steam、iTunes、Google Play、亚马逊、PSN 等。',subs:[{id:'gc-steam',en:'Steam',cn:'Steam 卡'},{id:'gc-itunes',en:'iTunes / Apple',cn:'iTunes / 苹果'},{id:'gc-google',en:'Google Play',cn:'Google Play'},{id:'gc-other',en:'Amazon & More',cn:'亚马逊及其他'}]},
+ {id:'software',icon:'💻',en:'Software for Sale',cn:'软件出售',desc_en:'Licensed tools, licences and lifetime builds.',desc_cn:'正版工具、授权与永久版本。',subs:[{id:'sw-licence',en:'Licences',cn:'授权码'},{id:'sw-tools',en:'Automation Tools',cn:'自动化工具'},{id:'sw-design',en:'Design Assets',cn:'设计素材'}]},
+ {id:'backends',icon:'🧩',en:'Platform Backend Designs',cn:'平台后台源码',desc_en:'Exchange, shop and bot backends with admin panels.',desc_cn:'交易所、商城、机器人后台源码，含管理面板。',subs:[{id:'be-exchange',en:'Exchange Backends',cn:'交易所后台'},{id:'be-shop',en:'Shop & Mini App',cn:'商城与小程序'},{id:'be-bot',en:'Bot Backends',cn:'机器人后台'}]},
+ {id:'data',icon:'🗂',en:'Data Extraction',cn:'数据采集',desc_en:'Scraping, leads and clean datasets on request.',desc_cn:'爬取、线索与定制数据集。',subs:[{id:'data-leads',en:'Lead Lists',cn:'客户线索'},{id:'data-scrape',en:'Custom Scraping',cn:'定制爬取'}]},
+ {id:'tiktok',icon:'🎵',en:'TikTok Services',cn:'TikTok 服务',desc_en:'Accounts, followers, live gifts and ads help.',desc_cn:'账号、粉丝、直播礼物与广告支持。',subs:[{id:'tt-accounts',en:'Accounts',cn:'账号'},{id:'tt-growth',en:'Followers & Likes',cn:'粉丝与点赞'}]},
+ {id:'numbers',icon:'📱',en:'Second Number Register',cn:'二次号码注册',desc_en:'Verification numbers for any platform, per country.',desc_cn:'各平台各国家验证号码。',subs:[{id:'num-sms',en:'SMS Verification',cn:'短信验证'},{id:'num-rent',en:'Number Rental',cn:'号码租用'}]},
+ {id:'ai',icon:'🤖',en:'AI Accounts & Products',cn:'AI 账号与产品',desc_en:'ChatGPT Plus, Claude, Midjourney, API credits.',desc_cn:'ChatGPT Plus、Claude、Midjourney、接口额度。',subs:[{id:'ai-chat',en:'ChatGPT & Claude',cn:'ChatGPT 与 Claude'},{id:'ai-image',en:'Image & Video AI',cn:'图像与视频 AI'},{id:'ai-api',en:'API Credits',cn:'接口额度'}]},
+ {id:'facebook',icon:'📘',en:'Facebook Accounts',cn:'Facebook 账号',desc_en:'Profiles, pages and business managers with warranty.',desc_cn:'个人号、主页与广告账户，带质保。',subs:[{id:'fb-accounts',en:'Accounts & Pages',cn:'账号与主页'},{id:'fb-bm',en:'Business Managers',cn:'商务管理平台'}]},
+ {id:'bank',icon:'🏦',en:'Bank Accounts',cn:'银行账户',desc_en:'Verified bank and payment accounts, KYC ready.',desc_cn:'已认证银行与支付账户，可过 KYC。',subs:[{id:'bank-personal',en:'Personal Accounts',cn:'个人账户'},{id:'bank-payment',en:'Payment Accounts',cn:'支付账户'}]},
+ {id:'crypto',icon:'🪙',en:'Crypto Exchange Accounts',cn:'加密货币交易所',desc_en:'Verified exchange accounts and P2P merchant setups.',desc_cn:'认证交易所账户与 P2P 商家配置。',subs:[{id:'cr-verified',en:'Verified Accounts',cn:'认证账号'},{id:'cr-p2p',en:'P2P Merchants',cn:'P2P 商家'}]},
+ {id:'social',icon:'🌍',en:'Other Social Media',cn:'其他社交媒体',desc_en:'Instagram, X, YouTube, Discord, Reddit and more.',desc_cn:'Instagram、X、YouTube、Discord、Reddit 等。',subs:[{id:'so-instagram',en:'Instagram',cn:'Instagram'},{id:'so-x',en:'X / Twitter',cn:'X / 推特'},{id:'so-youtube',en:'YouTube',cn:'YouTube'},{id:'so-discord',en:'Discord & Reddit',cn:'Discord 与 Reddit'}]},
+ {id:'bots',icon:'🛠',en:'Bots & Chatbots',cn:'机器人与聊天机器人',desc_en:'Custom Telegram bots, AI chat agents, automation.',desc_cn:'定制 Telegram 机器人、AI 客服与自动化。',subs:[{id:'bot-custom',en:'Custom Bots',cn:'定制机器人'},{id:'bot-ai',en:'AI Chat Agents',cn:'AI 客服'}]},
+ {id:'cloud',icon:'☁️',en:'Cloud Control & Mass Messaging',cn:'云控与群发',desc_en:'Phone farms, cloud senders, bulk delivery panels.',desc_cn:'云控设备、群发平台与批量发送面板。',subs:[{id:'cl-sender',en:'Mass Senders',cn:'群发工具'},{id:'cl-farm',en:'Cloud Phone Farms',cn:'云控机房'}]},
+ {id:'premium',icon:'💎',en:'Premium & Subscriptions',cn:'会员与订阅',desc_en:'Streaming, design and productivity subscriptions.',desc_cn:'影音、设计效率类订阅。',subs:[{id:'pr-stream',en:'Streaming',cn:'影音订阅'},{id:'pr-pro',en:'Pro Tools',cn:'专业工具'}]},
+ {id:'other',icon:'📦',en:'More Services',cn:'更多服务',desc_en:'Anything else you need — ask support.',desc_cn:'其他需求，联系客服。',subs:[{id:'ot-custom',en:'Custom Orders',cn:'定制订单'}]}
+];
+
+const SEED_ITEMS = [
+ {id:'it101',cat:'telegram',sub:'tg-premium',name:'Telegram Premium — 12 months',desc:'Full Telegram Premium on your own account: 4 GB uploads, faster downloads, voice-to-text, exclusive stickers, no ads. Activated by our team within minutes; nothing to install.',price:24.99,stock:48,delivery:'Instant — under 10 minutes',icon:'✈️'},
+ {id:'it102',cat:'telegram',sub:'tg-members',name:'Telegram Members — 1000 real',desc:'1000 genuine members added to your channel or group, drip-fed over 3 days so it looks natural. No bots. 30-day refill warranty.',price:8.5,stock:120,delivery:'Start within 1 hour',icon:'✈️'},
+ {id:'it103',cat:'telegram',sub:'tg-accounts',name:'Aged Telegram Account — 2019/2022',desc:'Aged accounts with real history, no bans, phone confirmed, ready for automation or business use. Login details delivered as a text file.',price:3.2,stock:64,delivery:'Instant',icon:'✈️'},
+ {id:'it104',cat:'whatsapp',sub:'wa-accounts',name:'WhatsApp Business Account — verified',desc:'Freshly registered business account with a working number, ready for the API or the app. Comes with the number and the 2FA code.',price:12,stock:9,delivery:'Instant',icon:'💬'},
+ {id:'it201',cat:'giftcards',sub:'gc-steam',name:'Steam Gift Card — $50',desc:'Redeemable in any region supported by Steam. Code delivered instantly, region stated on the code file. No chargeback, warranty till redeemed.',price:47,stock:22,delivery:'Instant',icon:'🎮'},
+ {id:'it202',cat:'giftcards',sub:'gc-itunes',name:'iTunes / Apple Gift Card — $100',desc:'US region Apple gift card. Add to your Apple ID balance and buy apps, iCloud or Apple Music.',price:94,stock:15,delivery:'Instant',icon:'🍏'},
+ {id:'it301',cat:'software',sub:'sw-tools',name:'Bulk Account Manager Pro — lifetime',desc:'Desktop tool for managing hundreds of social accounts from one window with proxies, warm-up schedules and export. Lifetime licence, 1 PC.',price:39,stock:31,delivery:'Instant licence key',icon:'💻'},
+ {id:'it401',cat:'backends',sub:'be-shop',name:'Crypto Exchange Backend + Mini App',desc:'Full source: Node backend, admin panel, Telegram mini app front end, KYC hooks and payment gateway stubs. Deployed for you on request.',price:299,stock:5,delivery:'24 hours after payment',icon:'🧩'},
+ {id:'it501',cat:'data',sub:'data-leads',name:'Verified Lead List — 10,000 records',desc:'10k cleaned, de-duplicated business leads in your niche with name, email, site and phone. CSV delivery, GDPR-scrubbed fields.',price:65,stock:12,delivery:'Within 6 hours',icon:'🗂'},
+ {id:'it601',cat:'tiktok',sub:'tt-growth',name:'TikTok Followers — 5000',desc:'Real-looking followers delivered gradually over 48 hours to protect reach. No password needed, just your username. 60-day refill.',price:18,stock:40,delivery:'Start within 30 minutes',icon:'🎵'},
+ {id:'it701',cat:'numbers',sub:'num-sms',name:'SMS Verification — any platform',desc:'Receive the code on a temporary number for Telegram, WhatsApp, Discord, Tinder, Amazon and more. 20 minutes of rental included.',price:1.4,stock:500,delivery:'Instant',icon:'📱'},
+ {id:'it801',cat:'ai',sub:'ai-chat',name:'ChatGPT Plus — 1 month',desc:'Full ChatGPT Plus on your own email: GPT-5 class models, image generation, file analysis, faster responses. Warranty for the whole month.',price:16.5,stock:26,delivery:'Under 15 minutes',icon:'🤖'},
+ {id:'it802',cat:'ai',sub:'ai-image',name:'Midjourney — 1 month basic',desc:'Midjourney subscription activated on your Discord account with 200 generations and relax mode.',price:11,stock:14,delivery:'Under 30 minutes',icon:'🎨'},
+ {id:'it901',cat:'facebook',sub:'fb-accounts',name:'Facebook Aged Account — 2016-2020',desc:'Aged profiles with friends and history, email confirmed, no restrictions. Ideal for advertising and marketplace.',price:6.5,stock:38,delivery:'Instant',icon:'📘'},
+ {id:'it1001',cat:'crypto',sub:'cr-verified',name:'Verified Exchange Account — KYC done',desc:'Fully KYC-verified exchange account with email and 2FA handed over. Region and limits stated on delivery.',price:120,stock:7,delivery:'Within 12 hours',icon:'🪙'},
+ {id:'it1101',cat:'social',sub:'so-instagram',name:'Instagram Account — 5k followers',desc:'Established Instagram profile with 5k organic-looking followers, bio and 20 posts. Email included.',price:22,stock:11,delivery:'Instant',icon:'🌍'},
+ {id:'it1201',cat:'bots',sub:'bot-custom',name:'Custom Telegram Bot — built for you',desc:'A bot built to your spec: shops, subscriptions, referral systems, admin panels. Includes hosting setup and 30 days of fixes.',price:149,stock:10,delivery:'3-5 days',icon:'🛠'},
+ {id:'it1301',cat:'cloud',sub:'cl-sender',name:'Mass Messaging Panel — 1 month',desc:'Cloud sender with rotating numbers, delivery reports and anti-ban pacing. Panel access for 30 days, unlimited campaigns.',price:59,stock:18,delivery:'Within 2 hours',icon:'☁️'}
+];
+(function seed(){
+  if(!S.cats) { S.cats = SEED_CATS; }
+  if(!S.items){ S.items = SEED_ITEMS.map(x => Object.assign({active:true}, x)); }
+})();
+
+/* reseller markup: applies on top of the admin price for that reseller's customers */
+function priceOf(item){
+  const base = Number(item.price)||0;
+  const mk = Number(S.markup)||0;
+  return mk > 0 ? Math.round(base * (1 + mk/100) * 100)/100 : base;
+}
+function basePriceOf(item){ return Number(item.price)||0; }
+function catOf(id){ return (S.cats||[]).find(c => c.id === id) || {icon:'📦', en:id, cn:id, subs:[]}; }
+function itemsIn(catId, subId){
+  return (S.items||[]).filter(i => i.cat === catId && (subId? i.sub === subId : true) && i.active !== false);
+}
+function findItem(id){ return (S.items||[]).find(i => i.id === id); }
+function nm(o){ return LANG === 'cn' ? (o.cn || o.en) : (o.en || o.cn); }
+function ds(c){ return LANG === 'cn' ? (c.desc_cn || c.desc_en) : (c.desc_en || c.desc_cn); }
+</script>
+
+<script>
+/* ============ RENDER: sections ============ */
+let TAB = 'home';
+let MARKET = {cat:null, sub:null, q:''};
+
+function go(tab){
+  TAB = tab; closeSheet(); haptic('light');
+  document.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  render(); window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function render(){
+  applyI18n();
+  const v = $('#view');
+  let out = '';
+  if(TAB === 'home') out = viewHome();
+  else if(TAB === 'market') out = viewMarket();
+  else if(TAB === 'wallet') out = viewWallet();
+  else if(TAB === 'orders') out = viewOrders();
+  else if(TAB === 'profile') out = viewProfile();
+  else if(TAB === 'product') out = viewProduct();
+  else if(TAB === 'refer') out = viewRefer();
+  else if(TAB === 'admin') out = viewAdmin();
+  v.innerHTML = out;
+  document.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB));
+  ticker();
+  if(typeof afterRender === 'function') afterRender();
+}
+
+function ticker(){
+  const el = $('#tkInner'); if(!el) return;
+  const bits = [
+    '⚡ <b>' + t('instant') + '</b>' + ' · VIP',
+    '🔐 ' + (LANG==='cn'?'人工核验库存':'Human-verified stock'),
+    '🌍 ' + (LANG==='cn'?'全球交付 · 中英文客服':'Worldwide delivery · EN / 中文 support'),
+    '🎁 ' + (LANG==='cn'?'推荐返佣 '+CFG.REF_PERCENT+'%':'Refer &amp; earn '+CFG.REF_PERCENT+'%'),
+    '💳 ' + (LANG==='cn'?'加密货币自动充值':'Crypto deposits auto-confirmed'),
+    '📦 <b>' + (S.items||[]).length + '</b> ' + (LANG==='cn'?'件商品在售':'products live')
+  ];
+  const line = bits.join(' &nbsp;•&nbsp; ');
+  el.innerHTML = '<span>' + line + '</span><span>' + line + '</span>';
+}
+
+function userLine(){
+  if(S.user) return '<div class="row"><span class="lbl">' + t('loggedInAs') + '</span><span class="val">' + esc(S.user.name || S.user.email) + '</span></div>';
+  return '';
+}
+
+/* ---------- HOME ---------- */
+function viewHome(){
+  const live = (S.items||[]).filter(i => i.active !== false).length;
+  const latest = (S.items||[]).filter(i => i.active !== false).slice(-4).reverse();
+  let h = '';
+  if(!S.online){
+    h += '<div class="banner" style="margin-bottom:14px"><div class="ic">👤</div><div><b>' + (LANG==='cn'?'登录后购买、充值并查看订单':'Log in to buy, deposit and track orders') + '</b><span>' + (LANG==='cn'?'数据保存在本设备 · 可在机器人 chat 内完成真实交付':'Local mode — the bot chat handles real delivery') + '</span></div></div>';
+  }
+  h += '<section class="hero">';
+  h += '<p class="kicker">' + t('heroKicker') + '</p>';
+  h += '<h1>' + t('heroTitle') + '</h1>';
+  h += '<p style="max-width:34ch">' + t('heroSub') + '</p>';
+  h += '<div class="cta"><button class="btn primary" onclick="go(\'market\')">🛍 ' + t('browse') + '</button>';
+  h += S.user ? '<button class="btn ghost" onclick="go(\'wallet\')">💰 ' + money(S.balance) + '</button>' : '<button class="btn ghost" onclick="go(\'profile\')">' + t('signup') + '</button>';
+  h += '</div></section>';
+
+  h += '<div class="grid3" style="margin-top:14px">';
+  h += '<div class="stat"><b>' + (S.cats||[]).length + '</b><span>' + t('statCats') + '</span></div>';
+  h += '<div class="stat"><b>' + live + '</b><span>' + t('statItems') + '</span></div>';
+  h += '<div class="stat"><b>24/7</b><span>' + t('statSupport') + '</span></div>';
+  h += '</div>';
+
+  h += '<div class="sec"><div><h2>' + t('cats') + '</h2><p style="margin:0">' + t('marketSub') + '</p></div><span class="more" onclick="go(\'market\')">' + t('viewAll') + ' →</span></div>';
+  h += '<div class="grid2">';
+  (S.cats||[]).slice(0,6).forEach((c,i) => {
+    const n = itemsIn(c.id).length;
+    h += '<div class="cat" style="animation-delay:' + (i*40) + 'ms" onclick="openCat(\'' + c.id + '\')"><div class="ic">' + (c.icon||'📦') + '</div><div class="nm">' + esc(nm(c)) + '</div><div class="ct">' + n + ' ' + t('items') + '</div></div>';
+  });
+  h += '</div>';
+
+  h += '<div class="sec"><h2>' + t('latest') + '</h2><span class="more" onclick="go(\'market\')">' + t('viewAll') + ' →</span></div>';
+  h += latest.map((it,i) => prodCard(it,i)).join('');
+
+  h += '<div class="sec"><h2>' + t('feats') + '</h2></div>';
+  h += '<div class="card glowline">';
+  h += '<div class="step"><div class="n">1</div><div><b>' + (LANG==='cn'?'人工核验库存':'Human-verified stock') + '</b><p>' + (LANG==='cn'?'只有可验证的货源才会留在货架上。':'Only supply we can verify stays on the shelf.') + '</p></div></div>';
+  h += '<div class="step"><div class="n">2</div><div><b>' + (LANG==='cn'?'即时或人工交付':'Instant or handled delivery') + '</b><p>' + (LANG==='cn'?'有现货的商品付款后立刻发送文件；需要人工的订单由真人处理。':'Digital stock is sent the moment you pay; manual orders go to a real person.') + '</p></div></div>';
+  h += '<div class="step"><div class="n">3</div><div><b>' + (LANG==='cn'?'余额与订单可追溯':'Traceable balance &amp; orders') + '</b><p>' + (LANG==='cn'?'每笔充值、消费与退款都有记录。':'Every deposit, purchase and refund is recorded.') + '</p></div></div>';
+  h += '</div>';
+
+  h += '<div class="sec"><h2>' + t('company') + '</h2></div>';
+  h += '<div class="card"><p>' + t('companyTxt') + '</p><div class="mini">• ' + t('companyP1') + '<br>• ' + t('companyP2') + '<br>• ' + t('companyP3') + '</div></div>';
+
+  h += '<div class="sec"><h2>' + t('support') + '</h2></div>';
+  h += '<div class="card"><p>' + t('supportTxt') + '</p><button class="btn ghost wide" onclick="contactSupport()">💬 ' + t('contactSupport') + '</button></div>';
+
+  h += '<div class="sec"><h2>' + t('referral') + '</h2></div>';
+  h += '<div class="card glowline"><p>' + t('referralTxt') + '</p><button class="btn primary wide" onclick="go(\'refer\')">🎁 ' + t('referral') + ' · ' + CFG.REF_PERCENT + '%</button></div>';
+  h += '<div style="height:22px"></div>';
+  return h;
+}
+
+function prodCard(it, i){
+  const p = priceOf(it), base = basePriceOf(it);
+  const st = Number(it.stock)||0;
+  let tag = '<span class="tag ok">' + t('inStock') + '</span>';
+  if(st <= 0) tag = '<span class="tag out">' + t('soldOut') + '</span>';
+  else if(st < 10) tag = '<span class="tag low">' + t('lowStock',{n:st}) + '</span>';
+  const c = catOf(it.cat);
+  let h = '<div class="prod" style="animation-delay:' + ((i||0)*45) + 'ms;margin-bottom:10px" onclick="openProduct(\'' + it.id + '\')">';
+  h += '<div class="thumb">' + (it.icon || c.icon || '📦') + '</div><div style="min-width:0;flex:1">';
+  h += '<div class="nm">' + esc(it.name) + '</div>';
+  h += '<div class="mt">' + tag + '<span>' + esc(nm(c)) + '</span></div></div>';
+  h += '<div class="price"><b>' + money(p) + '</b>' + (p !== base ? '<s>' + money(base) + '</s>' : '') + '</div></div>';
+  return h;
+}
+
+/* ---------- MARKET ---------- */
+function viewMarket(){
+  let h = '<section><p class="kicker">' + t('market') + '</p><h1 style="font-size:22px">' + t('market') + '</h1><p>' + t('marketSub') + '</p>';
+  h += '<input class="inp" id="q" placeholder="' + t('search') + '" value="' + esc(MARKET.q) + '" oninput="MARKET.q=this.value;renderMarketList()">';
+
+  if(MARKET.cat){
+    const c = catOf(MARKET.cat);
+    h += '<div class="back" onclick="MARKET.cat=null;MARKET.sub=null;render()">← ' + t('back') + '</div>';
+    h += '<div class="card glowline" style="margin-bottom:12px"><div style="display:flex;gap:12px;align-items:center"><div class="ic" style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,rgba(139,92,246,.28),rgba(34,211,238,.18));border:1px solid var(--line2)">' + (c.icon||'📦') + '</div><div><h3 style="margin:0">' + esc(nm(c)) + '</h3><div class="mini">' + esc(ds(c)||'') + '</div></div></div></div>';
+    if((c.subs||[]).length){
+      h += '<div class="chips">';
+      h += '<div class="chip' + (!MARKET.sub?' on':'') + '" onclick="MARKET.sub=null;render()">' + t('all') + '</div>';
+      (c.subs||[]).forEach(s => {
+        h += '<div class="chip' + (MARKET.sub===s.id?' on':'') + '" onclick="MARKET.sub=\'' + s.id + '\';render()">' + esc(nm(s)) + '</div>';
+      });
+      h += '</div>';
+    }
+  } else {
+    h += '<div class="chips" style="margin-top:12px"><div class="chip on">' + t('all') + '</div>';
+    (S.cats||[]).slice(0,8).forEach(c => {
+      h += '<div class="chip" onclick="openCat(\'' + c.id + '\')">' + (c.icon||'') + ' ' + esc(nm(c)) + '</div>';
+    });
+    h += '</div>';
+  }
+  h += '<div id="mlist"></div></section><div style="height:20px"></div>';
+  setTimeout(renderMarketList, 0);
+  return h;
+}
+
+function renderMarketList(){
+  const box = document.getElementById('mlist'); if(!box) return;
+  const q = (MARKET.q||'').toLowerCase();
+  let list = (S.items||[]).filter(i => i.active !== false);
+  if(MARKET.cat) list = list.filter(i => i.cat === MARKET.cat);
+  if(MARKET.sub) list = list.filter(i => i.sub === MARKET.sub);
+  if(q) list = list.filter(i => (i.name||'').toLowerCase().includes(q) || (i.desc||'').toLowerCase().includes(q));
+  if(!list.length){ box.innerHTML = '<div class="empty"><span class="e">🗃</span>' + t('noItems') + '</div>'; return; }
+  if(!MARKET.cat){
+    let h = '<div class="grid2" style="margin:8px 0 16px">';
+    (S.cats||[]).forEach((c,i) => {
+      const n = itemsIn(c.id).length;
+      h += '<div class="cat" style="animation-delay:' + (i*30) + 'ms" onclick="openCat(\'' + c.id + '\')"><div class="ic">' + (c.icon||'📦') + '</div><div class="nm">' + esc(nm(c)) + '</div><div class="ct">' + n + ' ' + t('items') + '</div></div>';
+    });
+    h += '</div>';
+    h += '<div class="sec"><h2>' + t('newArrivals') + '</h2></div>';
+    box.innerHTML = h + list.slice().reverse().map((it,i) => prodCard(it,i)).join('');
+    return;
+  }
+  box.innerHTML = list.map((it,i) => prodCard(it,i)).join('');
+}
+
+function openCat(id){ MARKET.cat = id; MARKET.sub = null; MARKET.q = ''; TAB='market'; haptic('light'); render(); window.scrollTo({top:0}); }
+
+/* ---------- PRODUCT ---------- */
+let PQTY = 1, PCUR = null;
+function openProduct(id){
+  PCUR = id; PQTY = 1; TAB = 'product'; haptic('light'); render(); window.scrollTo({top:0});
+}
+function viewProduct(){
+  const it = findItem(PCUR);
+  if(!it) return '<div class="empty"><span class="e">❓</span>Item not found.</div>';
+  const c = catOf(it.cat);
+  const p = priceOf(it), base = basePriceOf(it);
+  const st = Number(it.stock)||0;
+  let h = '<section>';
+  h += '<div class="back" onclick="openCat(\'' + it.cat + '\')">← ' + t('back') + '</div>';
+  h += '<div class="thumbbig">' + (it.icon || c.icon || '📦') + '</div>';
+  h += '<span class="badge">' + esc(nm(c)) + '</span>';
+  h += '<h1 style="font-size:21px;margin:10px 0 6px">' + esc(it.name) + '</h1>';
+  h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px"><span style="font-size:26px;font-weight:800">' + money(p) + '</span>';
+  if(p !== base) h += '<s class="mini">' + money(base) + '</s>';
+  h += st > 0 ? '<span class="tag ok">' + st + ' ' + t('inStock') + '</span>' : '<span class="tag out">' + t('soldOut') + '</span>';
+  h += '</div>';
+  h += '<div class="card" style="margin-bottom:12px"><h3>' + t('details') + '</h3><p style="margin:0">' + esc(it.desc || '') + '</p></div>';
+  h += '<div class="card" style="margin-bottom:12px">';
+  h += '<div class="row"><span class="lbl">' + t('delivery') + '</span><span class="val">' + esc(it.delivery || t('instant')) + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('stock') + '</span><span class="val">' + st + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('warranty') + '</span><span class="val">' + (LANG==='cn'?'7 天':'7 days') + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('yourBalance') + '</span><span class="val ' + (S.balance >= p ? 'grn':'red') + '">' + money(S.balance) + '</span></div>';
+  h += '</div>';
+  h += '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:13px">' + t('quantity') + '</b><div class="qty"><button onclick="chQty(-1)">−</button><span id="qval">' + PQTY + '</span><button onclick="chQty(1)">+</button></div></div>';
+  h += '<div class="row"><span class="lbl">' + t('total') + '</span><span class="val" id="ptot" style="font-size:17px">' + money(p*PQTY) + '</span></div></div>';
+  const ok = st >= PQTY;
+  h += '<button class="btn primary wide" style="margin-bottom:10px' + (ok?'':';opacity:.45') + '" ' + (ok?'':'disabled ') + 'onclick="buy(\'' + it.id + '\')">🛒 ' + t('buyNow') + ' · ' + money(p*PQTY) + '</button>';
+  h += '<button class="btn ghost wide" style="margin-bottom:10px" onclick="go(\'wallet\')">💰 ' + t('depositFirst') + '</button>';
+  h += '<button class="btn ghost wide" onclick="contactSupport()">💬 ' + t('chatSupport') + '</button>';
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+function chQty(d){
+  const it = findItem(PCUR); if(!it) return;
+  PQTY = Math.max(1, Math.min(Number(it.stock)||1, PQTY + d));
+  haptic('light');
+  const q = document.getElementById('qval'), tot = document.getElementById('ptot');
+  if(q) q.textContent = PQTY;
+  if(tot) tot.textContent = money(priceOf(it)*PQTY);
+}
+function buy(id){
+  const it = findItem(id); if(!it) return;
+  const p = priceOf(it), total = Math.round(p*PQTY*100)/100;
+  const st = Number(it.stock)||0;
+  if(total > S.balance){ toast(t('notEnough',{n:money(total-S.balance)}),'err'); return; }
+  if(st < PQTY){ toast(t('soldOut'),'err'); return; }
+  S.balance = Math.round((S.balance - total)*100)/100;
+  it.stock = st - PQTY;
+  const oid = 'ORD' + Math.floor(10000 + Math.random()*89999);
+  const order = {id:oid, item_id:it.id, item_name:it.name, qty:PQTY, unit_price:p, total:total, status:'pending', date:today(), delivery:it.delivery||''};
+  S.orders.push(order);
+  S.txs.unshift({type:'purchase', amount:-total, note:it.name + ' × ' + PQTY, date:today(), id:oid});
+  saveAccount(); persist(); haptic('medium');
+  sendToBot({action:'buy', item:it.id, qty:PQTY, order:oid});
+  sheet('<h3>✅ ' + t('buyOk') + '</h3><p>' + t('orderId') + ' <b>' + oid + '</b></p>' +
+    '<div class="row"><span class="lbl">' + t('total') + '</span><span class="val">' + money(total) + '</span></div>' +
+    '<div class="row"><span class="lbl">' + t('status') + '</span><span class="val">' + t('st_pending') + '</span></div>' +
+    '<p class="mini" style="margin-top:12px">' + (LANG==='cn'?'如果该商品有库存文件，机器人会立即在此对话中发送给你。':'If this item has stock attached, the bot sends it to you in the chat right away.') + '</p>' +
+    '<button class="btn primary wide" style="margin-bottom:9px" onclick="closeSheet();go(\'orders\')">📦 ' + t('orders') + '</button>' +
+    '<button class="btn ghost wide" onclick="closeSheet();contactSupport()">💬 ' + t('chatSupport') + '</button>');
+}
+
+/* ---------- ORDERS ---------- */
+function viewOrders(){
+  let h = '<section><p class="kicker">' + t('orders') + '</p><h1 style="font-size:22px">' + t('orders') + '</h1>';
+  if(!S.orders.length){
+    h += '<div class="empty"><span class="e">📦</span>' + t('noOrders') + '<div style="margin-top:14px"><button class="btn primary" onclick="go(\'market\')">🛍 ' + t('browse') + '</button></div></div>';
+  } else {
+    h += S.orders.slice().reverse().map(o => {
+      const it = findItem(o.item_id) || {};
+      const st = o.status || 'pending';
+      const cls = st === 'completed' ? 'ok' : st === 'cancelled' ? 'out' : 'low';
+      return '<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">' +
+        '<div><b style="font-size:13px">' + esc(o.item_name) + '</b><div class="mini">' + t('orderId') + ' ' + esc(o.id) + ' · ' + esc(o.date) + '</div></div>' +
+        '<div class="price"><b>' + money(o.total) + '</b><span class="tag ' + cls + '">' + t('st_' + st) + '</span></div></div>' +
+        '<div class="row" style="padding-bottom:0"><span class="lbl">' + t('quantity') + '</span><span class="val">× ' + o.qty + '</span></div>' +
+        '<button class="btn ghost sm wide" style="margin-top:10px" onclick="contactSupport()">💬 ' + t('chatSupport') + '</button></div>';
+    }).join('');
+  }
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+</script>
+
+<script>
+/* ---------- WALLET ---------- */
+function viewWallet(){
+  let h = '<section><p class="kicker">' + t('wallet') + '</p><h1 style="font-size:22px">' + t('wallet') + '</h1>';
+  h += '<div class="hero" style="padding:20px 18px;margin-bottom:14px">';
+  h += '<div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">' + t('available') + '</div>';
+  h += '<div style="font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:4px 0 2px">' + money(S.balance) + '</div>';
+  h += '<div class="mini">' + (S.user ? esc(S.user.email || S.user.name || '') : t('loginReq')) + '</div>';
+  h += '<div class="cta"><button class="btn primary" onclick="depositSheet()">＋ ' + t('deposit') + '</button>';
+  h += '<button class="btn ghost" onclick="withdrawSheet()">🏦 ' + t('withdraw') + '</button></div></div>';
+
+  h += '<div class="grid2" style="margin-bottom:16px">';
+  h += '<div class="stat"><b>' + money(S.earnings) + '</b><span>' + t('earnings') + '</span></div>';
+  h += '<div class="stat"><b>' + S.refs + '</b><span>' + t('refs') + '</span></div>';
+  h += '</div>';
+
+  h += '<div class="card" style="margin-bottom:14px"><h3>' + t('deposit') + '</h3><p style="margin-bottom:8px">' + t('depositSub') + '</p>';
+  h += '<button class="btn vio wide sm" onclick="autoDeposit()">⚡ ' + (LANG==='cn'?'自动加密货币充值':'Automatic crypto deposit') + '</button></div>';
+
+  h += '<div class="sec"><h2>' + t('txs') + '</h2></div>';
+  if(!S.txs.length){
+    h += '<div class="empty" style="padding:22px"><span class="e">🧾</span>' + t('noTx') + '</div>';
+  } else {
+    h += '<div class="card">' + S.txs.slice(0,20).map(x => {
+      const pos = Number(x.amount) > 0;
+      return '<div class="row"><div><span class="val" style="display:block">' + esc(x.note || x.type) + '</span><span class="mini">' + esc(x.date||'') + '</span></div><span class="val ' + (pos?'grn':'red') + '">' + (pos?'+':'') + money(x.amount).replace('$','$') + '</span></div>';
+    }).join('') + '</div>';
+  }
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+
+function doMoney(n){
+  const v = parseFloat(String(n).replace(',','.').replace('$',''));
+  return isFinite(v) ? Math.round(v*100)/100 : 0;
+}
+
+function depositSheet(){
+  if(!S.user){ toast(t('loginReq'),'err'); go('profile'); return; }
+  sheet('<h3>' + t('depositTitle') + '</h3><p>' + t('depositSub') + '</p>' +
+    '<label class="fl">' + t('depositAmount') + '</label>' +
+    '<input class="inp" id="depAmt" type="number" inputmode="decimal" placeholder="50" value="50">' +
+    '<label class="fl">' + t('method') + '</label>' +
+    '<div class="chips" style="padding-bottom:12px"><div class="chip on" id="mUSDT" onclick="pickMethod(this)">USDT TRC20</div><div class="chip" onclick="pickMethod(this)">USDT BEP20</div><div class="chip" onclick="pickMethod(this)">BTC</div><div class="chip" onclick="pickMethod(this)">ETH</div></div>' +
+    '<button class="btn primary wide" style="margin-bottom:9px" onclick="autoDeposit()">⚡ ' + (LANG==='cn'?'前往支付平台':'Continue to payment') + '</button>' +
+    '<button class="btn ghost wide" onclick="manualDeposit()">🧾 ' + t('depositManual') + '</button>' +
+    '<p class="mini" style="margin-top:10px">' + t('depositManualTxt') + '</p>');
+}
+let DEP_METHOD = 'USDT TRC20';
+function pickMethod(el){ document.querySelectorAll('#modal .chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); DEP_METHOD = el.textContent.trim(); }
+function autoDeposit(){
+  const amt = doMoney((document.getElementById('depAmt')||{}).value || 0);
+  if(amt <= 0){ toast(t('required'),'err'); return; }
+  const openIt = () => {
+    sendToBot({action:'deposit', amount:amt, method:DEP_METHOD});
+    try { Telegram.WebApp.openLink(CFG.PAY_SITE, {try_instant_view:false}); } catch(e){ window.open(CFG.PAY_SITE,'_blank'); }
+    toast(LANG==='cn'?'支付完成后余额会自动更新':'Balance updates automatically after payment','ok');
+  };
+  if(S.online && CFG.API){
+    fetch(CFG.API + '/deposit', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user:userId(), amount:amt, method:DEP_METHOD})})
+      .then(r => r.json()).then(d => { if(d && d.pay_url){ try{ Telegram.WebApp.openLink(d.pay_url); }catch(e){ window.open(d.pay_url,'_blank'); } } else openIt(); })
+      .catch(openIt);
+  } else openIt();
+  closeSheet();
+}
+function manualDeposit(){
+  const amt = doMoney((document.getElementById('depAmt')||{}).value || 0);
+  closeSheet();
+  sendToBot({action:'deposit_manual', amount:amt, method:DEP_METHOD});
+  toast(LANG==='cn'?'已通知客服，请在机器人对话中发送交易号':'Support notified — send the transaction hash in the bot chat','ok');
+}
+function withdrawSheet(){
+  if(!S.user){ toast(t('loginReq'),'err'); go('profile'); return; }
+  if(S.balance < CFG.MIN_WITHDRAW){ toast('⚠️ ' + t('minWithdraw',{n:money(CFG.MIN_WITHDRAW)}),'err'); return; }
+  sheet('<h3>' + t('withdrawTitle') + '</h3><p>' + t('withdrawSub') + '</p>' +
+    '<div class="row"><span class="lbl">' + t('available') + '</span><span class="val">' + money(S.balance) + '</span></div>' +
+    '<label class="fl" style="margin-top:10px">' + t('amount') + '</label>' +
+    '<input class="inp" id="wdAmt" type="number" inputmode="decimal" placeholder="' + CFG.MIN_WITHDRAW + '">' +
+    '<label class="fl">' + t('address') + '</label>' +
+    '<input class="inp" id="wdAddr" placeholder="TRC20 / BEP20 / bank" value="' + esc((S.user && S.user.wallet) || '') + '">' +
+    '<button class="btn primary wide" onclick="doWithdraw()">🏦 ' + t('requestWithdraw') + '</button>');
+}
+function doWithdraw(){
+  const amt = doMoney(document.getElementById('wdAmt').value);
+  const addr = document.getElementById('wdAddr').value.trim();
+  if(!addr){ toast(t('required'),'err'); return; }
+  if(amt < CFG.MIN_WITHDRAW){ toast(t('tooSmall',{n:money(CFG.MIN_WITHDRAW)}),'err'); return; }
+  if(amt > S.balance){ toast(t('notEnough',{n:money(amt-S.balance)}),'err'); return; }
+  S.balance = Math.round((S.balance-amt)*100)/100;
+  S.withdrawals.push({amount:amt, wallet:addr, date:today(), status:'pending'});
+  S.txs.unshift({type:'withdraw', amount:-amt, note:t('withdraw') + ' · ' + addr.slice(0,12), date:today()});
+  if(S.user){ S.user.wallet = addr; }
+  saveAccount(); persist();
+  sendToBot({action:'withdraw', amount:amt, address:addr});
+  closeSheet(); render();
+  toast(t('withdrawOk'),'ok');
+}
+
+/* ---------- REFERRAL ---------- */
+function refLink(){
+  return 'https://t.me/' + CFG.BOT + '?start=ref' + (S.user ? (S.user.tg || S.user.id || '') : (TG_USER ? TG_USER.id : ''));
+}
+function viewRefer(){
+  const link = refLink();
+  let h = '<section><div class="back" onclick="go(\'home\')">← ' + t('back') + '</div>';
+  h += '<p class="kicker">' + CFG.REF_PERCENT + '% ' + (LANG==='cn'?'返佣':'commission') + '</p>';
+  h += '<h1>' + t('referral') + '</h1><p>' + t('referralTxt') + '</p>';
+  h += '<div class="card glowline" style="margin-bottom:14px"><label class="fl">' + t('yourLink') + '</label>';
+  h += '<div class="mono" style="background:var(--ink3);border:1px solid var(--line2);border-radius:12px;padding:12px;margin-bottom:10px">' + esc(link) + '</div>';
+  h += '<div class="split"><button class="btn primary" onclick="copy(\'' + link + '\')">📋 ' + t('copy') + '</button>';
+  h += '<button class="btn ghost" onclick="shareLink()">📤 ' + (LANG==='cn'?'分享':'Share') + '</button></div></div>';
+  h += '<div class="grid2" style="margin-bottom:16px"><div class="stat"><b>' + S.refs + '</b><span>' + t('refs') + '</span></div><div class="stat"><b>' + money(S.earnings) + '</b><span>' + t('earnings') + '</span></div></div>';
+  h += '<div class="sec"><h2>' + t('howItWorks') + '</h2></div><div class="card">';
+  h += '<div class="step"><div class="n">1</div><div><b>' + t('step1') + '</b><p>' + t('step1d') + '</p></div></div>';
+  h += '<div class="step"><div class="n">2</div><div><b>' + t('step2') + '</b><p>' + t('step2d') + '</p></div></div>';
+  h += '<div class="step"><div class="n">3</div><div><b>' + t('step3') + '</b><p>' + t('step3d') + '</p></div></div>';
+  h += '</div>';
+  h += '<div class="card" style="margin-top:14px"><h3>' + t('reseller') + '</h3><p style="margin:0">' + t('resellerTxt') + '</p></div>';
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+function shareLink(){
+  const link = refLink();
+  const txt = LANG==='cn' ? '全球数字商品批发市场，账号、礼品卡、软件、AI 一应俱全。' : 'The worldwide wholesale marketplace for accounts, gift cards, software and AI.';
+  try{ Telegram.WebApp.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(txt)); }
+  catch(e){ copy(link); }
+}
+
+/* ---------- ADMIN PANEL (inside the mini app) ---------- */
+let ADM = {tab:'products', edit:null, cat:null};
+function viewAdmin(){
+  if(!S.user || S.user.role !== 'admin'){
+    return '<section><div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'需要管理员权限':'Admins only') +
+      '<div style="margin-top:14px"><button class="btn ghost" onclick="go(\'profile\')">' + t('back') + '</button></div></div></section>';
+  }
+  let h = '<section><div class="back" onclick="go(\'profile\')">← ' + t('back') + '</div>';
+  h += '<p class="kicker">' + t('admin') + '</p><h1 style="font-size:22px">' + t('admin') + '</h1>';
+  h += '<div class="tabs">';
+  const tabs = [['products','🧩 ' + t('items')],['cats','🗂 ' + t('statCats')],['orders','🛒 ' + t('orders')],['users','👥 ' + (LANG==='cn'?'用户':'Users')]];
+  tabs.forEach(x => { h += '<div class="tab' + (ADM.tab===x[0]?' on':'') + '" onclick="ADM.tab=\'' + x[0] + '\';ADM.edit=null;render()">' + x[1] + '</div>'; });
+  h += '</div>';
+  if(ADM.tab === 'products') h += admProducts();
+  else if(ADM.tab === 'cats') h += admCats();
+  else if(ADM.tab === 'orders') h += admOrders();
+  else h += admUsers();
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+function admProducts(){
+  if(ADM.edit) return admEditItem(ADM.edit);
+  let h = '<div class="split" style="margin-bottom:12px"><button class="btn primary sm" onclick="ADM.edit=\'new\';render()">➕ ' + (LANG==='cn'?'新增商品':'Add product') + '</button>';
+  h += '<button class="btn ghost sm" onclick="openBot()">🤖 ' + t('openBot') + '</button></div>';
+  h += (S.items||[]).map(it => {
+    const c = catOf(it.cat);
+    return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center">' +
+      '<div style="min-width:0"><b style="font-size:12.5px">' + (it.icon||c.icon||'📦') + ' ' + esc(it.name) + '</b>' +
+      '<div class="mini">' + money(it.price) + ' · ' + (LANG==='cn'?'库存':'stock') + ' ' + (Number(it.stock)||0) + ' · ' + esc(nm(c)) + '</div></div>' +
+      '<div style="display:flex;gap:6px"><button class="btn ghost sm" onclick="ADM.edit=\'' + it.id + '\';render()">✏️</button>' +
+      '<button class="btn ghost sm" onclick="admDel(\'' + it.id + '\')">🗑</button></div></div></div>';
+  }).join('');
+  return h;
+}
+function admEditItem(id){
+  const isNew = id === 'new';
+  const it = isNew ? {id:'it' + Date.now().toString(36), cat:(S.cats[0]||{}).id, sub:'', name:'', desc:'', price:1, stock:0, delivery:'Instant', active:true} : (findItem(id) || {});
+  let h = '<div class="back" onclick="ADM.edit=null;render()">← ' + t('back') + '</div>';
+  h += '<div class="card"><h3>' + (isNew ? '➕ ' + (LANG==='cn'?'新增商品':'New product') : '✏️ ' + esc(it.name)) + '</h3>';
+  h += '<label class="fl">' + (LANG==='cn'?'名称':'Name') + '</label><input class="inp" id="eName" value="' + esc(it.name||'') + '">';
+  h += '<label class="fl">' + (LANG==='cn'?'分类':'Category') + '</label><select class="inp" id="eCat" onchange="admSubOpts()">' +
+       (S.cats||[]).map(c => '<option value="' + c.id + '"' + (it.cat===c.id?' selected':'') + '>' + esc(nm(c)) + '</option>').join('') + '</select>';
+  h += '<label class="fl">' + t('subcats') + '</label><select class="inp" id="eSub"></select>';
+  h += '<label class="fl">' + t('details') + '</label><textarea class="inp" id="eDesc" rows="4" style="resize:vertical">' + esc(it.desc||'') + '</textarea>';
+  h += '<div class="split"><div><label class="fl">' + t('price') + '</label><input class="inp" id="ePrice" type="number" inputmode="decimal" value="' + (it.price||0) + '"></div>';
+  h += '<div><label class="fl">' + t('stock') + '</label><input class="inp" id="eStock" type="number" inputmode="numeric" value="' + (it.stock||0) + '"></div></div>';
+  h += '<label class="fl">' + t('delivery') + '</label><input class="inp" id="eDel" value="' + esc(it.delivery||'Instant') + '">';
+  h += '<button class="btn primary wide" style="margin-bottom:9px" onclick="admSave(\'' + id + '\')">' + t('save') + '</button>';
+  h += '<p class="mini">' + (LANG==='cn'?'数字商品的交付文件 / 号码在机器人内用 /file ITEMID 上传。':'Attach the delivery file or code for this product with /file ' + it.id + ' in the bot.') + '</p></div>';
+  setTimeout(admSubOpts, 0);
+  return h;
+}
+function admSubOpts(){
+  const sel = document.getElementById('eCat'), box = document.getElementById('eSub');
+  if(!sel || !box) return;
+  const c = catOf(sel.value);
+  const cur = ADM.edit === 'new' ? '' : ((findItem(ADM.edit)||{}).sub || '');
+  box.innerHTML = '<option value="">—</option>' + (c.subs||[]).map(s => '<option value="' + s.id + '"' + (cur===s.id?' selected':'') + '>' + esc(nm(s)) + '</option>').join('');
+}
+function admSave(id){
+  const name = document.getElementById('eName').value.trim();
+  const desc = document.getElementById('eDesc').value.trim();
+  const cat = document.getElementById('eCat').value;
+  const sub = document.getElementById('eSub').value;
+  const price = doMoney(document.getElementById('ePrice').value);
+  const stock = Math.max(0, parseInt(document.getElementById('eStock').value||'0',10));
+  const del = document.getElementById('eDel').value.trim() || 'Instant';
+  if(!name){ toast(t('required'),'err'); return; }
+  if(id === 'new'){
+    S.items.push({id:'it' + Date.now().toString(36), cat:cat, sub:sub, name:name, desc:desc, price:price, stock:stock, delivery:del, active:true, icon:(catOf(cat)||{}).icon||'📦'});
+  } else {
+    const it = findItem(id);
+    if(it){ it.name=name; it.desc=desc; it.cat=cat; it.sub=sub; it.price=price; it.stock=stock; it.delivery=del; }
+  }
+  persist(); ADM.edit=null; render(); toast(t('saved'),'ok');
+}
+function admDel(id){
+  if(!confirm('Delete this product?')) return;
+  S.items = S.items.filter(i => i.id !== id);
+  persist(); render(); toast('🗑', 'ok');
+}
+function admCats(){
+  let h = '<button class="btn primary sm wide" style="margin-bottom:12px" onclick="admNewCat()">➕ ' + (LANG==='cn'?'新增分类':'Add category') + '</button>';
+  h += (S.cats||[]).map(c => {
+    const n = itemsIn(c.id).length;
+    return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+      '<div><b style="font-size:12.5px">' + (c.icon||'📦') + ' ' + esc(nm(c)) + '</b><div class="mini">' + n + ' ' + t('items') + ' · ' + (c.subs||[]).length + ' ' + t('subcats') + '</div></div>' +
+      '<button class="btn ghost sm" onclick="admNewSub(\'' + c.id + '\')">➕ sub</button></div></div>';
+  }).join('');
+  return h;
+}
+function admNewCat(){
+  const en = prompt(LANG==='cn'?'分类英文名':'Category name (EN)');
+  if(!en) return;
+  const cn = prompt(LANG==='cn'?'中文名':'Chinese name') || en;
+  const icon = prompt('Emoji', '📦') || '📦';
+  S.cats.push({id:'c' + Date.now().toString(36), icon:icon.slice(0,4), en:en, cn:cn, desc_en:'', desc_cn:'', subs:[]});
+  persist(); render(); toast(t('saved'),'ok');
+}
+function admNewSub(catId){
+  const en = prompt(LANG==='cn'?'子分类英文名':'Sub-category name (EN)');
+  if(!en) return;
+  const cn = prompt(LANG==='cn'?'中文名':'Chinese name') || en;
+  const c = catOf(catId);
+  const real = (S.cats||[]).find(x => x.id === catId);
+  if(!real) return;
+  if(!real.subs) real.subs = [];
+  real.subs.push({id:'s' + Date.now().toString(36), en:en, cn:cn});
+  persist(); render(); toast(t('saved'),'ok');
+}
+function admOrders(){
+  if(!S.orders.length) return '<div class="empty"><span class="e">🛒</span>' + t('noOrders') + '</div>';
+  return S.orders.slice().reverse().map(o => {
+    const st = o.status || 'pending';
+    const cls = st === 'completed' ? 'ok' : st === 'cancelled' ? 'out' : 'low';
+    return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px">' +
+      '<div><b style="font-size:12.5px">' + esc(o.item_name) + '</b><div class="mini">' + esc(o.id) + ' · × ' + o.qty + ' · ' + esc(o.date) + '</div></div>' +
+      '<span class="tag ' + cls + '">' + t('st_' + st) + '</span></div>' +
+      '<div class="mini" style="margin-top:6px">' + t('total') + ': <b>' + money(o.total) + '</b></div>' +
+      '<div class="split" style="margin-top:8px"><button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'completed\')">✅</button>' +
+      '<button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'cancelled\')">↩️</button></div></div>';
+  }).join('');
+}
+function admOrder(id, st){
+  const o = S.orders.find(x => x.id === id);
+  if(!o) return;
+  o.status = st;
+  if(st === 'cancelled'){ S.balance = Math.round((S.balance + Number(o.total||0))*100)/100; }
+  saveAccount(); persist(); render(); toast(t('saved'),'ok');
+}
+function admUsers(){
+  const accs = ls.get('accounts', {});
+  const keys = Object.keys(accs);
+  if(!keys.length) return '<div class="empty"><span class="e">👥</span>' + (LANG==='cn'?'还没有注册用户':'No registered users yet') + '</div>';
+  return keys.map(k => {
+    const a = accs[k];
+    return '<div class="card" style="margin-bottom:9px;padding:12px"><b style="font-size:12.5px">' + esc(a.name||k) + '</b>' +
+      '<div class="mini">' + esc(k) + ' · ' + money(a.balance) + ' · ' + ((a.orders||[]).length) + ' ' + t('orders') + '</div>' +
+      '<div class="split" style="margin-top:8px"><button class="btn ghost sm" onclick="admCredit(\'' + k + '\',10)">➕ $10</button>' +
+      '<button class="btn ghost sm" onclick="admCredit(\'' + k + '\',-10)">➖ $10</button></div></div>';
+  }).join('');
+}
+function admCredit(email, delta){
+  const all = ls.get('accounts', {});
+  const a = all[email];
+  if(!a) return;
+  a.balance = Math.max(0, Math.round((Number(a.balance||0) + delta)*100)/100);
+  ls.set('accounts', all);
+  if(S.user && S.user.email === email){ S.balance = a.balance; }
+  persist(); render(); toast(t('saved'),'ok');
+}
+
+/* ---------- PROFILE / AUTH ---------- */
+function viewProfile(){
+  let h = '<section><p class="kicker">' + t('profile') + '</p><h1 style="font-size:22px">' + t('profile') + '</h1>';
+  if(!S.user){
+    h += '<div class="card glowline" style="margin-bottom:14px"><h3>' + t('signupTitle') + '</h3>';
+    h += '<label class="fl">' + t('name') + '</label><input class="inp" id="rgName" placeholder="' + (LANG==='cn'?'你的姓名':'Your name') + '">';
+    h += '<label class="fl">' + t('email') + '</label><input class="inp" id="rgEmail" type="email" inputmode="email" placeholder="you@mail.com">';
+    h += '<label class="fl">' + t('password') + '</label><input class="inp" id="rgPass" type="password" placeholder="••••••">';
+    h += '<button class="btn primary wide" style="margin-bottom:9px" onclick="signup()">' + t('signup') + '</button>';
+    h += '<button class="btn ghost wide" onclick="loginSheet()">' + t('haveAccount') + '</button></div>';
+    h += '<div class="card"><p style="margin:0">' + t('loginReq') + '</p></div>';
+    h += '<div style="height:20px"></div></section>';
+    return h;
+  }
+  const initial = (S.user.name || S.user.email || 'U').trim().charAt(0).toUpperCase();
+  h += '<div class="card glowline" style="margin-bottom:14px"><div style="display:flex;gap:12px;align-items:center">';
+  h += '<div class="av">' + esc(initial) + '</div><div style="min-width:0"><b style="font-size:15px">' + esc(S.user.name || '—') + '</b><div class="mini">' + esc(S.user.email || '') + '</div></div>';
+  h += '<span class="badge" style="margin-left:auto">' + (S.user.role === 'admin' ? 'ADMIN' : S.user.role === 'reseller' ? 'RESELLER' : 'MEMBER') + '</span></div>';
+  h += '<div style="height:12px"></div>';
+  h += '<div class="row"><span class="lbl">' + t('id') + '</span><span class="val mono">' + esc(S.user.tg || S.user.id || '—') + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('balance') + '</span><span class="val">' + money(S.balance) + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('memberSince') + '</span><span class="val">' + esc(S.user.since || today()) + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + t('lang') + '</span><span class="val">' + (LANG==='cn'?'中文':'English') + '</span></div>';
+  h += '</div>';
+
+  if(S.user.role === 'reseller' || S.markup > 0){
+    h += '<div class="card" style="margin-bottom:14px"><h3>🤝 ' + t('reseller') + '</h3><p>' + t('resellerTxt') + '</p>';
+    h += '<label class="fl">' + t('markup') + '</label><input class="inp" id="mk" type="number" inputmode="decimal" value="' + S.markup + '" placeholder="30">';
+    h += '<button class="btn primary wide" onclick="saveMarkup()">' + t('save') + '</button></div>';
+  }
+  if(S.user.role === 'admin'){
+    h += '<div class="card" style="margin-bottom:14px"><h3>🛠 ' + t('admin') + '</h3><p>' + t('adminTxt') + '</p>';
+    h += '<button class="btn primary wide" style="margin-bottom:8px" onclick="ADM.tab=\'products\';ADM.edit=null;TAB=\'admin\';render()">🛠 ' + t('admin') + '</button>';
+    h += '<button class="btn ghost wide" onclick="openBot()">🤖 ' + t('openBot') + '</button></div>';
+  }
+  h += '<div class="card" style="margin-bottom:14px"><h3>' + t('settings') + '</h3>';
+  h += '<div class="row"><span class="lbl">' + t('lang') + '</span><button class="pill" onclick="toggleLang()">' + (LANG==='cn'?'中文 / English':'EN / 中文') + '</button></div>';
+  h += '<div class="row"><span class="lbl">' + t('theme') + '</span><button class="pill" onclick="toggleTheme()">' + (document.documentElement.getAttribute('data-theme')==='dark'?t('dark'):t('light')) + '</button></div>';
+  h += '</div>';
+  h += '<button class="btn ghost wide" style="margin-bottom:8px" onclick="contactSupport()">💬 ' + t('chatSupport') + '</button>';
+  h += '<button class="btn ghost wide" onclick="logout()">🚪 ' + t('logout') + '</button>';
+  h += '<div class="center mini" style="margin:16px 0">Wholesale Market Worldwide · v2 · ' + (S.online ? t('online') : t('offline')) + '</div>';
+  h += '</section><div style="height:20px"></div>';
+  return h;
+}
+/* local account book so logging back in restores the same profile */
+function saveAccount(){
+  if(!S.user || !S.user.email) return;
+  const all = ls.get('accounts', {});
+  all[S.user.email] = {
+    user:S.user, name:S.user.name, id:S.user.id, since:S.user.since, role:S.user.role,
+    wallet:S.user.wallet || '', balance:S.balance, orders:S.orders, txs:S.txs,
+    earnings:S.earnings, refs:S.refs, markup:S.markup, withdrawals:S.withdrawals
+  };
+  ls.set('accounts', all);
+}
+function saveMarkup(){
+  const v = Math.max(0, Math.min(500, doMoney(document.getElementById('mk').value)));
+  S.markup = v; persist(); render(); toast(t('saved'),'ok');
+  sendToBot({action:'markup', value:v});
+}
+function signup(){
+  const name = document.getElementById('rgName').value.trim();
+  const email = document.getElementById('rgEmail').value.trim();
+  const pass = document.getElementById('rgPass').value;
+  if(!name || !email || pass.length < 4){ toast(t('required') + ' · ' + t('passwordHint'),'err'); return; }
+  if(!/^\S+@\S+\.\S+$/.test(email)){ toast(t('emailBad'),'err'); return; }
+  S.user = {name:name, email:email, id:uid(), tg: TG_USER ? TG_USER.id : '', since: today(), role: ls.get('role','member'), wallet:''};
+  ls.set('role', S.user.role);
+  saveAccount();
+  persist(); haptic('medium'); render(); toast(t('signupOk'),'ok');
+  sendToBot({action:'signup', name:name, email:email});
+}
+function loginSheet(){
+  sheet('<h3>' + t('loginTitle') + '</h3>' +
+    '<label class="fl">' + t('email') + '</label><input class="inp" id="lgEmail" type="email" value="' + esc((S.user&&S.user.email)||'') + '" placeholder="you@mail.com">' +
+    '<label class="fl">' + t('password') + '</label><input class="inp" id="lgPass" type="password" placeholder="••••••">' +
+    '<button class="btn primary wide" style="margin-bottom:9px" onclick="login()">' + t('login') + '</button>' +
+    '<button class="btn ghost wide" onclick="closeSheet();logout(true)">' + t('noAccount') + '</button>');
+}
+function login(){
+  const email = document.getElementById('lgEmail').value.trim();
+  const pass = document.getElementById('lgPass').value;
+  if(!email || pass.length < 4){ toast(t('required'),'err'); return; }
+  const saved = ls.get('accounts', {});
+  const rec = saved[email];
+  if(rec){
+    S.user = rec.user || {name:rec.name || email.split('@')[0], email:email, id:rec.id, since:rec.since, role:rec.role || 'member', wallet:rec.wallet || ''};
+    S.balance = Number(rec.balance || 0); S.orders = rec.orders || []; S.txs = rec.txs || [];
+    S.earnings = Number(rec.earnings || 0); S.refs = Number(rec.refs || 0); S.markup = Number(rec.markup || 0);
+  } else {
+    S.user = {name:email.split('@')[0], email:email, id:uid(), tg: TG_USER ? TG_USER.id : '', since: today(), role:'member', wallet:''};
+  }
+  persist(); closeSheet(); haptic('medium'); go('home'); toast(t('loginOk'),'ok');
+}
+function logout(force){
+  if(!force && !confirm(t('logoutWarn'))) return;
+  S.user = null; S.balance = 0; S.earnings = 0; S.refs = 0; S.orders = []; S.txs = []; S.withdrawals = []; S.markup = 0;
+  persist(); render(); toast(t('logoutOk'),'ok');
+}
+function openBot(){
+  try{ Telegram.WebApp.openTelegramLink('https://t.me/' + CFG.BOT); }catch(e){ location.href = 'https://t.me/' + CFG.BOT; }
+}
+function contactSupport(){
+  try{ Telegram.WebApp.openTelegramLink('https://t.me/' + CFG.SUPPORT); }
+  catch(e){ toast('@' + CFG.SUPPORT,'ok'); }
+}
+</script>
+
+<script>
+/* ============ BACKEND HOOK ============ */
+function userId(){
+  try{ return (S.user && S.user.tg) ? String(S.user.tg) : (TG_USER ? String(TG_USER.id) : (S.user ? S.user.id : '')); }
+  catch(e){ return S.user ? (S.user.id||'') : ''; }
+}
+function chatId(){
+  try{
+    const id = Telegram.WebApp.initDataUnsafe?.chat_instance;
+    return id || userId();
+  }catch(e){ return userId(); }
+}
+
+/* Optional cloud sync. Nothing breaks when CFG.API is empty (offline/dev mode). */
+function api(path, body){
+  if(!CFG.API) return Promise.reject(new Error('offline'));
+  return fetch(CFG.API.replace(/\/$/,'') + path, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(Object.assign({user:userId(), init: (function(){ try{ return Telegram.WebApp.initData; }catch(e){ return ''; } })()}, body||{}))
+  }).then(r => r.json());
+}
+function syncState(){
+  if(!CFG.API) return;
+  api('/state').then(d => {
+    if(!d || !d.ok) return;
+    S.online = true;
+    if(typeof d.balance === 'number') S.balance = d.balance;
+    if(typeof d.earnings === 'number') S.earnings = d.earnings;
+    if(typeof d.refs === 'number') S.refs = d.refs;
+    if(Array.isArray(d.orders)) S.orders = d.orders;
+    if(Array.isArray(d.txs)) S.txs = d.txs;
+    if(Array.isArray(d.cats) && d.cats.length) S.cats = d.cats;
+    if(Array.isArray(d.items) && d.items.length) S.items = d.items;
+    if(d.role && S.user) S.user.role = d.role;
+    if(typeof d.markup === 'number' && d.markup > 0) S.markup = d.markup;
+    persist(); render();
+  }).catch(()=>{ S.online = false; });
+}
+
+/* Dashboard: every action is mirrored to the bot chat via sendData when available,
+   so the bot backend acts as the source of truth (balances, orders, delivery). */
+function sendToBot(payload){
+  /* In connected mode the bot/backend is the source of truth (it holds the real balance),
+     so the action is mirrored there. In standalone mode nothing is sent, so a purchase
+     is never charged twice. */
+  if(!CFG.API){ return; }
+  try{
+    if(Telegram.WebApp.sendData){
+      const s = JSON.stringify(payload);
+      if(s.length <= 4000){ Telegram.WebApp.sendData(s); }
+    }
+  }catch(e){}
+  try{ api('/event', payload).catch(()=>{}); }catch(e){}
+}
+
+function afterRender(){
+  document.querySelectorAll('.btn').forEach(b => {
+    b.addEventListener('pointerdown', function(ev){
+      const r = document.createElement('span');
+      r.className = 'rip';
+      const rect = this.getBoundingClientRect();
+      const d = Math.max(rect.width, rect.height);
+      r.style.width = r.style.height = d + 'px';
+      r.style.left = (ev.clientX - rect.left - d/2) + 'px';
+      r.style.top = (ev.clientY - rect.top - d/2) + 'px';
+      r.style.opacity = '.35'; r.style.transition = 'transform .55s, opacity .55s';
+      this.appendChild(r);
+      setTimeout(()=>{ r.style.transform='scale(2.4)'; r.style.opacity='0'; setTimeout(()=>r.remove(), 560); }, 10);
+    });
+  });
+  const q = document.getElementById('q');
+  if(q && MARKET.q && !q.dataset.f){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); q.dataset.f = '1'; }
+}
+
+/* ============ BOOT ============ */
+(function boot(){
+  try{
+    Telegram.WebApp.ready(); Telegram.WebApp.expand();
+    Telegram.WebApp.setHeaderColor('#06070d');
+    Telegram.WebApp.setBackgroundColor('#06070d');
+    Telegram.WebApp.disableVerticalSwipes && Telegram.WebApp.disableVerticalSwipes();
+  }catch(e){}
+  const savedTheme = ls.get('theme', null);
+  if(savedTheme){ document.documentElement.setAttribute('data-theme', savedTheme); }
+  document.getElementById('themeBtn').textContent = document.documentElement.getAttribute('data-theme')==='light' ? '☀️' : '🌙';
+
+  if(!S.user && TG_USER){
+    S.user = {name: (TG_USER.first_name||'') + (TG_USER.last_name? ' '+TG_USER.last_name : ''), email:'', id:'tg'+TG_USER.id, tg: TG_USER.id, since: today(), role: ls.get('role','member'), wallet:''};
+    persist();
+  }
+  const hash = (location.hash||'').replace('#','');
+  if(hash === 'market' || hash === 'wallet' || hash === 'orders' || hash === 'profile') TAB = hash;
+  /* preview an admin account locally: open the page with ?admin=1 */
+  if(location.search.indexOf('admin=1') >= 0 && S.user){ S.user.role = 'admin'; ls.set('role','admin'); persist(); }
+  const startParam = (function(){ try{ return Telegram.WebApp.initDataUnsafe.start_param || ''; }catch(e){ return ''; } })();
+  if(startParam && startParam.indexOf('ref') === 0){
+    S.refBy = startParam.slice(3);
+    ls.set('refBy', S.refBy);
+  }
+  applyI18n();
+  go(TAB);
+  syncState();
+})();
+</script>
+</body>
+</html>
