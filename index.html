@@ -443,7 +443,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 const CFG = {
   API: window.WM_API || "",   /* fill in to enable cloud sync, empty = offline */
   BOT: "wholesalemarketworldwideV2bot",
-  SUPPORT: "xiaomip1",
+  SUPPORT: "Esimbuywithcrypto",
   ADMIN_ID: "7417254569",
   CURRENCY: "USD",
   REF_PERCENT: 10,
@@ -495,7 +495,15 @@ const S = {
   markup: Number(ls.get('markup', 0)) || 0,
   cats: ls.get('cats', null),
   items: ls.get('items', null),
-  online: false
+  online: false,
+  /* live admin panel state (comes from the bot, never from this device) */
+  rights: null,
+  liveUsers: null,
+  liveOrders: null,
+  liveTeam: null,
+  uq: '',
+  loadingUsers: false,
+  uStats: null
 };
 function persist(){
   ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
@@ -976,10 +984,25 @@ function viewAdmin(){
   h += '</section><div style="height:20px"></div>';
   return h;
 }
+function loadCatalog(force){
+  if(!hasApi()) return;
+  if(S.catalogLive && !force) return;
+  callApi('catalog').then(function(d){
+    if(d && d.ok){
+      if(Array.isArray(d.cats) && d.cats.length){ S.cats = d.cats; }
+      if(Array.isArray(d.items) && d.items.length){ S.items = d.items; }
+      S.catalogLive = true;
+      persist(); render();
+    }
+  });
+}
 function admProducts(){
+  if(!can('products')) return '<div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'没有该权限':'No right for this') + '</div>';
+  loadCatalog();
   if(ADM.edit) return admEditItem(ADM.edit);
-  let h = '<div class="split" style="margin-bottom:12px"><button class="btn primary sm" onclick="ADM.edit=\'new\';render()">➕ ' + (LANG==='cn'?'新增商品':'Add product') + '</button>';
-  h += '<button class="btn ghost sm" onclick="openBot()">🤖 ' + t('openBot') + '</button></div>';
+  let h = apiBar();
+  h += '<div class="split" style="margin-bottom:12px"><button class="btn primary sm" onclick="ADM.edit=\'new\';render()">➕ ' + (LANG==='cn'?'新增商品':'Add product') + '</button>';
+  h += '<button class="btn ghost sm" onclick="loadCatalog(true)">🔄 ' + (LANG==='cn'?'刷新':'Refresh') + '</button></div>';
   h += (S.items||[]).map(it => {
     const c = catOf(it.cat);
     return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center">' +
@@ -1024,21 +1047,39 @@ function admSave(id){
   const stock = Math.max(0, parseInt(document.getElementById('eStock').value||'0',10));
   const del = document.getElementById('eDel').value.trim() || 'Instant';
   if(!name){ toast(t('required'),'err'); return; }
+  let it;
   if(id === 'new'){
-    S.items.push({id:'it' + Date.now().toString(36), cat:cat, sub:sub, name:name, desc:desc, price:price, stock:stock, delivery:del, active:true, icon:(catOf(cat)||{}).icon||'📦'});
+    it = {id:'it' + Date.now().toString(36), cat:cat, sub:sub, name:name, desc:desc, price:price,
+          stock:stock, delivery:del, active:true, icon:(catOf(cat)||{}).icon||'📦'};
+    S.items.push(it);
   } else {
-    const it = findItem(id);
+    it = findItem(id);
     if(it){ it.name=name; it.desc=desc; it.cat=cat; it.sub=sub; it.price=price; it.stock=stock; it.delivery=del; }
   }
-  persist(); ADM.edit=null; render(); toast(t('saved'),'ok');
+  if(!it){ toast('error','err'); return; }
+  persist(); ADM.edit=null; render();
+  if(hasApi()){
+    callApi('saveitem', {item: it}).then(function(d){
+      if(d && d.ok && Array.isArray(d.items)){ S.items = d.items; S.catalogLive = true; persist(); render(); toast(t('saved'),'ok'); }
+    });
+  } else { toast(t('saved'),'ok'); }
 }
 function admDel(id){
   if(!confirm('Delete this product?')) return;
-  S.items = S.items.filter(i => i.id !== id);
-  persist(); render(); toast('🗑', 'ok');
+  S.items = S.items.filter(function(i){ return i.id !== id; });
+  persist(); render();
+  if(hasApi()){
+    callApi('delitem', {id:id}).then(function(d){
+      if(d && d.ok && Array.isArray(d.items)){ S.items = d.items; persist(); render(); }
+    });
+  }
+  toast('🗑', 'ok');
 }
 function admCats(){
-  let h = '<button class="btn primary sm wide" style="margin-bottom:12px" onclick="admNewCat()">➕ ' + (LANG==='cn'?'新增分类':'Add category') + '</button>';
+  if(!can('products')) return '<div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'没有该权限':'No right for this') + '</div>';
+  loadCatalog();
+  let h = apiBar();
+  h += '<button class="btn primary sm wide" style="margin-bottom:12px" onclick="admNewCat()">➕ ' + (LANG==='cn'?'新增分类':'Add category') + '</button>';
   h += (S.cats||[]).map(c => {
     const n = itemsIn(c.id).length;
     return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
@@ -1066,46 +1107,207 @@ function admNewSub(catId){
   real.subs.push({id:'s' + Date.now().toString(36), en:en, cn:cn});
   persist(); render(); toast(t('saved'),'ok');
 }
-function admOrders(){
-  if(!S.orders.length) return '<div class="empty"><span class="e">🛒</span>' + t('noOrders') + '</div>';
-  return S.orders.slice().reverse().map(o => {
-    const st = o.status || 'pending';
-    const cls = st === 'completed' ? 'ok' : st === 'cancelled' ? 'out' : 'low';
-    return '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px">' +
-      '<div><b style="font-size:12.5px">' + esc(o.item_name) + '</b><div class="mini">' + esc(o.id) + ' · × ' + o.qty + ' · ' + esc(o.date) + '</div></div>' +
-      '<span class="tag ' + cls + '">' + t('st_' + st) + '</span></div>' +
-      '<div class="mini" style="margin-top:6px">' + t('total') + ': <b>' + money(o.total) + '</b></div>' +
-      '<div class="split" style="margin-top:8px"><button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'completed\')">✅</button>' +
-      '<button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'cancelled\')">↩️</button></div></div>';
-  }).join('');
+/* ============ LIVE API — the bot is the source of truth ============
+   A web page can only see the phone it runs on, so a user list kept in
+   localStorage can never show accounts created elsewhere. Everything the admin
+   panel reads now comes from the bot, shared by every device. */
+function apiBase(){
+  const baked = String(CFG.API || '').trim();
+  if(baked && baked.indexOf('__') < 0) return baked;
+  return (ls.get('api_url','') || '').trim();
 }
-function admOrder(id, st){
-  const o = S.orders.find(x => x.id === id);
-  if(!o) return;
-  o.status = st;
-  if(st === 'cancelled'){ S.balance = Math.round((S.balance + Number(o.total||0))*100)/100; }
-  saveAccount(); persist(); render(); toast(t('saved'),'ok');
+function apiToken(){ return (ls.get('api_key','') || '').trim(); }
+function hasApi(){ return !!(apiBase() && apiToken()); }
+function can(need){
+  if(!S.rights) return true;
+  return S.rights.indexOf(need) >= 0;
+}
+function callApi(action, extra){
+  if(!hasApi()) return Promise.resolve({ok:false, error:(LANG==='cn'?'请先填写接口地址与密钥':'Add the API address and key first')});
+  const body = Object.assign({action:action, token:apiToken()}, extra || {});
+  return fetch(apiBase(), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok === false && d.error){ toast(d.error,'err'); }
+      if(d && Array.isArray(d.rights)){ S.rights = d.rights; }
+      return d;
+    })
+    .catch(function(e){ toast((LANG==='cn'?'无法连接接口':'Cannot reach the API'),'err'); return {ok:false, error:'network'}; });
+}
+function apiBar(){
+  const on = hasApi();
+  let h = '<div class="banner" style="margin-bottom:12px"><div class="ic">' + (on?'🟢':'🔌') + '</div><div>';
+  h += '<b>' + (on ? (LANG==='cn'?'已连接机器人数据库':'Connected to the bot database') : (LANG==='cn'?'未连接 — 数据只在本机':'Not connected — this device only')) + '</b>';
+  h += '<span>' + (on ? esc(apiBase().replace(/^https?:\/\//,'').slice(0,34)) : (LANG==='cn'?'填入接口地址与管理员密钥后，即可看到所有用户':'Add the API address and admin key to see every user')) + '</span></div>';
+  h += '<button class="pill" style="margin-left:auto" onclick="apiSheet()">⚙️</button></div>';
+  if(on){
+    h += '<div class="split" style="margin-bottom:12px"><button class="btn ghost sm" onclick="loadUsers(true)">🔄 ' + (LANG==='cn'?'刷新':'Refresh') + '</button>';
+    h += '<button class="btn ghost sm" onclick="bcastSheet()">📣 ' + (LANG==='cn'?'群发':'Broadcast') + '</button></div>';
+  }
+  return h;
+}
+function apiSheet(){
+  sheet('<h3>🔌 ' + (LANG==='cn'?'接口连接':'Admin connection') + '</h3>' +
+    '<p>' + (LANG==='cn'?'在机器人里发送 /apiurl 获取地址与密钥。密钥只保存在本设备，不会写进 index.html。':'Run /apiurl in the bot for the address and key. The key is kept on this device only — it is never written into index.html.') + '</p>' +
+    '<label class="fl">' + (LANG==='cn'?'接口地址':'API address') + '</label>' +
+    '<input class="inp" id="apiUrl" placeholder="https://…" value="' + esc(apiBase()) + '">' +
+    '<label class="fl">' + (LANG==='cn'?'管理员密钥':'Admin key') + '</label>' +
+    '<input class="inp" id="apiKey" placeholder="wm…" value="' + esc(apiToken()) + '">' +
+    '<button class="btn primary wide" style="margin-bottom:9px" onclick="saveApi()">🔗 ' + (LANG==='cn'?'连接':'Connect') + '</button>' +
+    '<button class="btn ghost wide" onclick="closeSheet()">' + t('no') + '</button>');
+}
+function saveApi(){
+  ls.set('api_url', (document.getElementById('apiUrl').value||'').trim());
+  ls.set('api_key', (document.getElementById('apiKey').value||'').trim());
+  CFG.API = '';
+  closeSheet();
+  if(!hasApi()){ toast(t('required'),'err'); return; }
+  S.liveUsers = null; S.liveOrders = null;
+  callApi('ping').then(function(d){
+    if(d && d.ok){ toast((LANG==='cn'?'已连接 · 用户 ':'Connected · users ') + d.users_n,'ok'); loadUsers(); }
+  });
+  render();
+}
+function loadUsers(force){
+  if(!hasApi()) return;
+  if(S.liveUsers && !force) return;
+  S.loadingUsers = true; render();
+  callApi('users').then(function(d){
+    S.loadingUsers = false;
+    if(d && d.ok){ S.liveUsers = d.users || []; S.uStats = {total:d.total, online:d.online}; render(); }
+    else { S.loadingUsers = false; render(); }
+  });
+}
+function ago(ts){
+  if(!ts) return '—';
+  const s = Math.floor((Date.now()/1000) - ts);
+  if(s < 60) return s + 's';
+  if(s < 3600) return Math.floor(s/60) + 'm';
+  if(s < 86400) return Math.floor(s/3600) + 'h';
+  return Math.floor(s/86400) + 'd';
 }
 function admUsers(){
-  const accs = ls.get('accounts', {});
-  const keys = Object.keys(accs);
-  if(!keys.length) return '<div class="empty"><span class="e">👥</span>' + (LANG==='cn'?'还没有注册用户':'No registered users yet') + '</div>';
-  return keys.map(k => {
-    const a = accs[k];
-    return '<div class="card" style="margin-bottom:9px;padding:12px"><b style="font-size:12.5px">' + esc(a.name||k) + '</b>' +
-      '<div class="mini">' + esc(k) + ' · ' + money(a.balance) + ' · ' + ((a.orders||[]).length) + ' ' + t('orders') + '</div>' +
-      '<div class="split" style="margin-top:8px"><button class="btn ghost sm" onclick="admCredit(\'' + k + '\',10)">➕ $10</button>' +
-      '<button class="btn ghost sm" onclick="admCredit(\'' + k + '\',-10)">➖ $10</button></div></div>';
+  let h = apiBar();
+  if(!hasApi()){
+    h += '<div class="empty"><span class="e">🔌</span>' + (LANG==='cn'?'连接机器人数据库后才能看到全部用户。':'Connect to the bot database to see every user — a phone can never see accounts made on other phones.') +
+      '<div style="margin-top:14px"><button class="btn primary" onclick="apiSheet()">🔌 ' + (LANG==='cn'?'填写接口':'Set up connection') + '</button></div></div>';
+    return h;
+  }
+  if(S.loadingUsers){
+    h += '<div class="sk" style="height:70px;margin-bottom:9px"></div><div class="sk" style="height:70px;margin-bottom:9px"></div><div class="sk" style="height:70px"></div>';
+    return h;
+  }
+  if(!S.liveUsers){ loadUsers(); h += '<div class="sk" style="height:70px;margin-bottom:9px"></div><div class="sk" style="height:70px"></div>'; return h; }
+  if(!S.liveUsers.length){ return h + '<div class="empty"><span class="e">👥</span>' + (LANG==='cn'?'还没有用户':'No users yet') + '</div>'; }
+  if(S.uStats){
+    h += '<div class="grid2" style="margin-bottom:12px"><div class="stat"><b>' + S.uStats.total + '</b><span>' + (LANG==='cn'?'总用户':'Users') + '</span></div>';
+    h += '<div class="stat"><b>' + S.uStats.online + '</b><span>' + (LANG==='cn'?'在线':'Online') + '</span></div></div>';
+  }
+  h += '<input class="inp" id="uq" placeholder="' + (LANG==='cn'?'搜索姓名 / 邮箱 / ID':'Search name, email, id') + '" oninput="filterUsers(this.value)" value="' + esc(S.uq||'') + '" style="margin-bottom:12px">';
+  const q = (S.uq||'').toLowerCase();
+  const list = S.liveUsers.filter(function(u){
+    if(!q) return true;
+    return (u.name||'').toLowerCase().indexOf(q)>=0 || (u.email||'').toLowerCase().indexOf(q)>=0 ||
+           (u.username||'').toLowerCase().indexOf(q)>=0 || String(u.id).indexOf(q)>=0;
+  });
+  h += list.map(function(u){
+    const dot = u.online ? '<span style="color:#5eead4">●</span>' : '<span style="color:var(--dim2)">○</span>';
+    const role = u.role === 'owner' ? '👑' : u.role === 'admin' ? '🛠' : u.role === 'subadmin' ? '🤝' : '👤';
+    let r = '<div class="card" style="margin-bottom:9px;padding:12px" onclick="userSheet(\'' + u.id + '\')">';
+    r += '<div style="display:flex;gap:10px;align-items:center">';
+    r += '<div class="av" style="width:38px;height:38px;font-size:15px;border-radius:12px">' + esc((u.name||'?').slice(0,1).toUpperCase()) + '</div>';
+    r += '<div style="min-width:0;flex:1"><b style="font-size:12.5px">' + dot + ' ' + role + ' ' + esc(u.name||u.id) + '</b>';
+    r += '<div class="mini">' + (u.username ? '@' + esc(u.username) + ' · ' : '') + esc(u.email || '—') + ' · <code>' + esc(u.id) + '</code></div>';
+    r += '<div class="mini">' + (LANG==='cn'?'最后在线':'seen') + ' ' + ago(u.last_seen) + ' · ' + u.orders_n + ' ' + (LANG==='cn'?'单':'orders') + '</div></div>';
+    r += '<div class="price"><b>' + money(u.balance) + '</b><span class="mini">' + (LANG==='cn'?'已消费':'spent') + ' ' + money(u.spent) + '</span></div>';
+    r += '</div></div>';
+    return r;
   }).join('');
+  return h;
 }
-function admCredit(email, delta){
-  const all = ls.get('accounts', {});
-  const a = all[email];
-  if(!a) return;
-  a.balance = Math.max(0, Math.round((Number(a.balance||0) + delta)*100)/100);
-  ls.set('accounts', all);
-  if(S.user && S.user.email === email){ S.balance = a.balance; }
-  persist(); render(); toast(t('saved'),'ok');
+function filterUsers(v){ S.uq = v; render(); }
+function userSheet(id){
+  const u = (S.liveUsers||[]).find(function(x){ return String(x.id) === String(id); });
+  if(!u) return;
+  let h = '<h3>' + esc(u.name||u.id) + ' <span class="mini">#' + esc(u.id) + '</span></h3>';
+  h += '<p class="mini">' + (u.online ? '🟢 ' + (LANG==='cn'?'在线':'Online now') : '⚪ ' + (LANG==='cn'?'离线':'Offline') + ' · ' + ago(u.last_seen)) + '</p>';
+  h += '<div class="card" style="padding:10px;margin-bottom:12px">';
+  const rows = [[t('email'), u.email||'—'], ['Telegram', u.username ? '@'+u.username : '—'], [(LANG==='cn'?'电话':'Phone'), u.phone||'—'],
+    [(LANG==='cn'?'角色':'Role'), u.role], [t('balance'), money(u.balance)], [(LANG==='cn'?'返佣':'Earnings'), money(u.earnings)],
+    [(LANG==='cn'?'累计消费':'Total spent'), money(u.spent)], [(LANG==='cn'?'订单数':'Orders'), String(u.orders_n||0)],
+    [(LANG==='cn'?'注册时间':'Joined'), u.joined||'—'], [(LANG==='cn'?'语言':'Language'), u.lang||'en'],
+    [(LANG==='cn'?'推荐人':'Referred by'), u.ref_by||'—'], [(LANG==='cn'?'提现地址':'Wallet'), u.wallet||'—']];
+  rows.forEach(function(r){ h += '<div class="row"><span class="lbl">' + r[0] + '</span><span class="val">' + esc(r[1]) + '</span></div>'; });
+  h += '</div>';
+  if(can('wallet')){
+    h += '<label class="fl">' + (LANG==='cn'?'金额 USD':'Amount USD') + '</label><input class="inp" id="uAmt" type="number" inputmode="decimal" placeholder="25">';
+    h += '<div class="split" style="margin-bottom:9px"><button class="btn primary" onclick="uWallet(\'' + u.id + '\',\'credit\')">➕ ' + (LANG==='cn'?'加余额':'Credit') + '</button>';
+    h += '<button class="btn ghost" onclick="uWallet(\'' + u.id + '\',\'debit\')">➖ ' + (LANG==='cn'?'扣余额':'Debit') + '</button></div>';
+  }
+  if(can('message')){
+    h += '<label class="fl">' + (LANG==='cn'?'私发消息':'Private message') + '</label><textarea class="inp" id="uMsg" rows="3" style="resize:vertical" placeholder="' + (LANG==='cn'?'发给这位用户的消息':'Message to this user') + '"></textarea>';
+    h += '<button class="btn vio wide" style="margin-bottom:9px" onclick="uSend(\'' + u.id + '\')">💬 ' + (LANG==='cn'?'发送':'Send') + '</button>';
+  }
+  h += '<button class="btn ghost wide" onclick="closeSheet()">' + t('no') + '</button>';
+  sheet(h);
+}
+function uWallet(id, mode){
+  const amt = doMoney(document.getElementById('uAmt').value);
+  if(amt <= 0){ toast(t('required'),'err'); return; }
+  callApi(mode, {id:id, amount:amt}).then(function(d){
+    if(d && d.ok){ toast('✅ ' + money(amt) + ' → ' + money(d.balance),'ok'); closeSheet(); loadUsers(true); }
+  });
+}
+function uSend(id){
+  const txt = (document.getElementById('uMsg').value||'').trim();
+  if(!txt){ toast(t('required'),'err'); return; }
+  callApi('msg', {id:id, text:txt}).then(function(d){ if(d && d.ok){ toast(t('saved'),'ok'); closeSheet(); } });
+}
+function bcastSheet(){
+  if(!can('broadcast')){ toast((LANG==='cn'?'没有群发权限':'No broadcast right'),'err'); return; }
+  sheet('<h3>📣 ' + (LANG==='cn'?'群发给所有用户':'Broadcast to all users') + '</h3>' +
+    '<p>' + (LANG==='cn'?'这会立刻发送给机器人的全部用户，无法撤回。':'This goes to every user of the bot at once and cannot be taken back.') + '</p>' +
+    '<textarea class="inp" id="bcText" rows="5" style="resize:vertical" placeholder="' + (LANG==='cn'?'消息内容':'Your message') + '"></textarea>' +
+    '<button class="btn primary wide" style="margin-bottom:9px" onclick="doBcast()">📤 ' + (LANG==='cn'?'确认发送':'Send now') + '</button>' +
+    '<button class="btn ghost wide" onclick="closeSheet()">' + t('no') + '</button>');
+}
+function doBcast(){
+  const txt = (document.getElementById('bcText').value||'').trim();
+  if(!txt){ toast(t('required'),'err'); return; }
+  if(!confirm(LANG==='cn'?'确定发送给全部用户？':'Send this to every user?')) return;
+  callApi('broadcast', {text:txt}).then(function(d){
+    if(d && d.ok){ toast((LANG==='cn'?'群发已开始':'Broadcast started'),'ok'); closeSheet(); }
+  });
+}
+function admOrders(){
+  let h = apiBar();
+  if(!hasApi()){ return h + '<div class="empty"><span class="e">🔌</span>' + (LANG==='cn'?'连接后显示全部订单。':'Connect to see every order.') + '</div>'; }
+  if(!S.liveOrders){
+    callApi('orders').then(function(d){ if(d && d.ok){ S.liveOrders = d.orders || []; render(); } });
+    return h + '<div class="sk" style="height:70px;margin-bottom:9px"></div><div class="sk" style="height:70px"></div>';
+  }
+  if(!S.liveOrders.length) return h + '<div class="empty"><span class="e">🛒</span>' + t('noOrders') + '</div>';
+  h += S.liveOrders.slice().reverse().map(function(o){
+    const st = o.status || 'pending';
+    const cls = st === 'completed' ? 'ok' : st === 'cancelled' ? 'out' : 'low';
+    let r = '<div class="card" style="margin-bottom:9px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px">' +
+      '<div style="min-width:0"><b style="font-size:12.5px">' + esc(o.item_name) + '</b>' +
+      '<div class="mini">' + esc(o.id) + ' · ×' + esc(o.qty) + ' · ' + esc(o.date) + '</div>' +
+      '<div class="mini">' + (LANG==='cn'?'用户':'user') + ' <code>' + esc(o.user||'') + '</code> · ' + money(o.total) + '</div></div>' +
+      '<span class="tag ' + cls + '">' + t('st_' + st) + '</span></div>';
+    if(can('orders')){
+      r += '<div class="split" style="margin-top:8px"><button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'completed\')">✅</button>' +
+        '<button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'processing\')">⏳</button>' +
+        '<button class="btn ghost sm" onclick="admOrder(\'' + o.id + '\',\'refund\')">↩️</button></div>';
+    }
+    return r + '</div>';
+  }).join('');
+  return h;
+}
+function admOrder(id, st){
+  callApi('setorder', {id:id, status:st}).then(function(d){
+    if(d && d.ok){ S.liveOrders = d.orders; render(); toast(t('saved'),'ok'); }
+  });
 }
 
 /* ---------- PROFILE / AUTH ---------- */
