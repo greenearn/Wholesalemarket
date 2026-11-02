@@ -383,6 +383,28 @@ function refreshRole(){
   else if(!S.user.role){ S.user.role = 'member'; }
 }
 
+/* Is this person an admin?
+   True when the signed-in account is an admin, when this Telegram account is the
+   bot owner, or when this device was unlocked with ?admin=1. The bot stays the
+   real authority; this only decides what the panel shows. */
+function isAdmin(){
+  if(S.user && S.user.role === 'admin') return true;
+  try{
+    if(TG_USER && String(TG_USER.id) === String(CFG.ADMIN_ID || '')) return true;
+  }catch(e){}
+  return ls.get('forceAdmin', false) === true;
+}
+/* Called from boot: recognise the owner even before they sign up. */
+function unlockAdmin(){
+  const adminId = String(CFG.ADMIN_ID || '').trim();
+  try{
+    if(adminId && TG_USER && String(TG_USER.id) === adminId){
+      ls.set('forceAdmin', true);
+      if(S.user){ S.user.role = 'admin'; }
+    }
+  }catch(e){}
+}
+
 /* load an account record into the running state */
 function hydrate(rec, email){
   S.user = rec.user || {
@@ -571,7 +593,7 @@ function render(){
   v.innerHTML = out;
   const admTab = document.getElementById('tbAdmin');
   if(admTab){
-    const canSee = !!(S.user && S.user.role === 'admin');
+    const canSee = isAdmin();
     admTab.style.display = canSee ? '' : 'none';
   }
   document.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB));
@@ -937,7 +959,7 @@ function shareLink(){
 /* ---------- ADMIN PANEL (inside the mini app) ---------- */
 let ADM = {tab:'products', edit:null, cat:null};
 function viewAdmin(){
-  if(!S.user || S.user.role !== 'admin'){
+  if(!isAdmin()){
     return '<section><div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'需要管理员权限':'Admins only') +
       '<div style="margin-top:14px"><button class="btn ghost" onclick="go(\'profile\')">' + t('back') + '</button></div></div></section>';
   }
@@ -1106,9 +1128,13 @@ function viewProfile(){
     h += '<label class="fl">' + t('markup') + '</label><input class="inp" id="mk" type="number" inputmode="decimal" value="' + S.markup + '" placeholder="30">';
     h += '<button class="btn primary wide" onclick="saveMarkup()">' + t('save') + '</button></div>';
   }
-  if(S.user.role === 'admin'){
+  if(isAdmin()){
     h += '<div class="card" style="margin-bottom:14px"><h3>🛠 ' + t('admin') + '</h3><p>' + t('adminTxt') + '</p>';
     h += '<button class="btn primary wide" style="margin-bottom:8px" onclick="ADM.tab=\'products\';ADM.edit=null;TAB=\'admin\';render()">🛠 ' + t('admin') + '</button>';
+    h += '<button class="btn ghost wide" onclick="openBot()">🤖 ' + t('openBot') + '</button></div>';
+  }
+  if(!isAdmin()){
+    h += '<div class="card" style="margin-bottom:14px"><h3>🔑 ' + (LANG==='cn'?'管理员入口':'Admin access') + '</h3><p style="margin-bottom:10px">' + (LANG==='cn'?'如果你是店主，先在机器人里发送 /admin，再点「在小程序内管理」打开本页，管理面板就会解锁。':'If you are the shop owner, send /admin in the bot and tap "Manage in the app" — the admin panel then unlocks here.') + '</p>';
     h += '<button class="btn ghost wide" onclick="openBot()">🤖 ' + t('openBot') + '</button></div>';
   }
   h += '<div class="card" style="margin-bottom:14px"><h3>' + t('settings') + '</h3>';
@@ -1390,10 +1416,12 @@ function afterRender(){
   } else {
     S.user = null;
   }
-  /* Draft the owner as admin so the in-app admin panel is always reachable. */
+  /* Recognise the bot owner (and ?admin=1) so the panel is always reachable. */
   const roleMap = loadRoles();
   const adminId = String(CFG.ADMIN_ID || '').trim();
   if(adminId){ roleMap['tg:' + adminId] = 'admin'; ls.set('roles', roleMap); }
+  if(location.search.indexOf('admin=1') >= 0){ ls.set('forceAdmin', true); }
+  unlockAdmin();
   const hash = (location.hash||'').replace('#','');
   if(hash === 'market' || hash === 'wallet' || hash === 'orders' || hash === 'profile') TAB = hash;
   /* preview an admin account locally: open the page with ?admin=1 */
