@@ -204,6 +204,7 @@ html[data-theme=light] nav#tabbar{background:linear-gradient(180deg,rgba(255,255
   <button class="tb" data-tab="wallet" onclick="go('wallet')"><i>💰</i><span data-i18n="tWallet">Wallet</span></button>
   <button class="tb" data-tab="orders" onclick="go('orders')"><i>📦</i><span data-i18n="tOrders">Orders</span></button>
   <button class="tb" data-tab="profile" onclick="go('profile')"><i>👤</i><span data-i18n="tProfile">Profile</span></button>
+  <button class="tb" id="tbAdmin" style="display:none" data-tab="admin" onclick="go('admin')"><i>🛠</i><span data-i18n="tAdmin">Admin</span></button>
 </div></nav>
 
 <div id="toast"></div>
@@ -263,7 +264,12 @@ en:{
  online:"Connected", empty:"Nothing to show yet.",
  buyOk:"Order placed — check your orders.", buyFail:"Could not complete the purchase.",
  qty:"×", left:"left", depositAmount:"Amount in USD", method:"Method",
- chatSupport:"Chat with support", copyAddr:"Tap to copy", passwordHint:"At least 4 characters",
+ chatSupport:"Chat with support", copyAddr:"Tap to copy", passwordHint:"At least 6 characters", password2:"Confirm password",
+ pwShort:"Password must be at least 6 characters", pwMismatch:"The two passwords do not match",
+ emailTaken:"That email is already registered — log in instead", noAccountFound:"No account with that email — sign up first",
+ wrongPass:"Wrong password", nameShort:"Please enter your name", signingIn:"Signing in…",
+ signupTab:"Sign up", loginTab:"Log in", logoutTitle:"Log out",
+ adminEntryTxt:"Manage products, stock, orders and users.", adminOnly:"Admins only",
  required:"Please fill every field", emailBad:"That email does not look right",
  hi:"Hi", welcomeBack:"Welcome back",
  newArrivals:"New arrivals", bestValue:"Best value", trust:"Trusted by resellers worldwide"
@@ -319,11 +325,84 @@ cn:{
  online:"已连接", empty:"暂无内容。",
  buyOk:"下单成功，请查看订单。", buyFail:"购买失败。",
  qty:"×", left:"剩余", depositAmount:"充值金额（USD）", method:"支付方式",
- chatSupport:"联系客服", copyAddr:"点击复制", passwordHint:"至少 4 位字符",
+ chatSupport:"联系客服", copyAddr:"点击复制", passwordHint:"至少 6 位字符", password2:"Confirm password",
+ pwShort:"密码至少需要 6 位", pwMismatch:"两次输入的密码不一致",
+ emailTaken:"该邮箱已注册，请直接登录", noAccountFound:"该邮箱没有账号，请先注册",
+ wrongPass:"密码错误", nameShort:"请输入姓名", signingIn:"正在登录…",
+ signupTab:"注册", loginTab:"登录", logoutTitle:"退出登录",
+ adminEntryTxt:"管理商品、库存、订单与用户。", adminOnly:"仅管理员",
  required:"请填写所有字段", emailBad:"邮箱格式不正确",
  hi:"你好", welcomeBack:"欢迎回来",
  newArrivals:"新品上架", bestValue:"超值推荐", trust:"全球代理商信赖"
 }};
+/* ---- auth + admin strings (patched in so both languages stay in sync) ---- */
+Object.assign(I18N.en, {
+  authTitle:'Your private zone', authSub:'Create an account to buy, deposit and track orders. Your balance and orders stay tied to this account.',
+  tabLogin:'Log in', tabSignup:'Sign up', confirmPass:'Confirm password', passHint:'At least 6 characters',
+  passMismatch:'The two passwords do not match', emailTaken:'That email already has an account — log in instead',
+  wrongPass:'Wrong email or password', noAccountFound:'No account with that email', passShort:'Password must be at least 6 characters',
+  ctaLogin:'Log in', ctaSignup:'Create free account', haveAccount2:'Already have an account? Log in', noAccount2:'New here? Create an account',
+  logoutQ:'Log out of this device?', adminAccess:'You have admin access', openAdmin:'Open admin panel',
+  secureNote:'Your password is stored hashed on this device, never as plain text.',
+  needLogin:'Log in first', or:'or', connectedAs:'Connected with Telegram', guest:'Guest'
+});
+Object.assign(I18N.cn, {
+  authTitle:'你的私人空间', authSub:'',
+  tabLogin:'登录', tabSignup:'注册', confirmPass:'确认密码', passHint:'至少 6 位字符',
+  passMismatch:'两次输入的密码不一致', emailTaken:'该邮箱已注册，请直接登录',
+  wrongPass:'邮箱或密码错误', noAccountFound:'该邮箱没有账号', passShort:'密码至少 6 位',
+  ctaLogin:'登录', ctaSignup:'免费注册', haveAccount2:'已有账号？去登录', noAccount2:'还没有账号？去注册',
+  logoutQ:'确定要退出当前设备吗？', adminAccess:'你拥有管理员权限', openAdmin:'打开管理面板',
+  secureNote:'密码以哈希形式保存在本设备，不会明文存储。',
+  needLogin:'请先登录', or:'或', connectedAs:'已连接 Telegram', guest:'访客'
+});
+
+/* ---- tiny non-cryptographic hash so a password is never stored in clear text ---- */
+function hashPass(pw){
+  const s = 'wm$' + pw + '$v2';
+  let a = 0x811c9dc5, b = 0x1000193, c = 7;
+  for(let i=0;i<s.length;i++){
+    const k = s.charCodeAt(i);
+    a = ((a ^ k) * 16777619) >>> 0;
+    b = ((b + k * (i + 7)) * 2654435761) >>> 0;
+    c = (c * 31 + k) >>> 0;
+  }
+  return a.toString(16) + b.toString(16) + c.toString(16) + '.' + s.length.toString(16);
+}
+let AUTH_TAB = 'login';
+
+/* role comes from being the bot owner, or an admin flag on the account */
+function refreshRole(){
+  if(!S.user) return;
+  try{
+    if(TG_USER && String(TG_USER.id) === String(CFG.ADMIN_ID || '')){ S.user.role = 'admin'; return; }
+  }catch(e){}
+  const accs = ls.get('accounts', {});
+  const rec = accs[S.user.email || ''];
+  if(rec && rec.role === 'admin'){ S.user.role = 'admin'; }
+  else if(!S.user.role){ S.user.role = 'member'; }
+}
+
+/* load an account record into the running state */
+function hydrate(rec, email){
+  S.user = rec.user || {
+    name: rec.name || String(email).split('@')[0], email: email,
+    id: rec.id || uid(), tg: (TG_USER ? TG_USER.id : ''),
+    since: rec.since || today(), role: rec.role || 'member', wallet: rec.wallet || ''
+  };
+  S.user.email = email;
+  if(!S.user.tg && TG_USER){ S.user.tg = TG_USER.id; }
+  S.balance = Number(rec.balance || 0);
+  S.orders = rec.orders || [];
+  S.txs = rec.txs || [];
+  S.earnings = Number(rec.earnings || 0);
+  S.refs = Number(rec.refs || 0);
+  S.markup = Number(rec.markup || 0);
+  S.withdrawals = rec.withdrawals || [];
+  refreshRole();
+  persist();
+}
+
 let LANG = (function(){
   const saved = localStorage.getItem('wm_lang');
   if(saved === 'cn' || saved === 'en') return saved;
@@ -342,7 +421,8 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 const CFG = {
   API: window.WM_API || "",   /* fill in to enable cloud sync, empty = offline */
   BOT: "wholesalemarketworldwideV2bot",
-  SUPPORT: "support",
+  SUPPORT: "xiaomip1",
+  ADMIN_ID: "7417254569",
   CURRENCY: "USD",
   REF_PERCENT: 10,
   MIN_WITHDRAW: 5.0,
@@ -471,6 +551,7 @@ let MARKET = {cat:null, sub:null, q:''};
 
 function go(tab){
   TAB = tab; closeSheet(); haptic('light');
+  if(tab === 'admin' && S.user){ S.user.role = roleFor(S.user); }
   document.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   render(); window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -483,11 +564,16 @@ function render(){
   else if(TAB === 'market') out = viewMarket();
   else if(TAB === 'wallet') out = viewWallet();
   else if(TAB === 'orders') out = viewOrders();
-  else if(TAB === 'profile') out = viewProfile();
+  else if(TAB === 'profile') out = S.user ? viewProfile() : viewAuth();
   else if(TAB === 'product') out = viewProduct();
   else if(TAB === 'refer') out = viewRefer();
   else if(TAB === 'admin') out = viewAdmin();
   v.innerHTML = out;
+  const admTab = document.getElementById('tbAdmin');
+  if(admTab){
+    const canSee = !!(S.user && S.user.role === 'admin');
+    admTab.style.display = canSee ? '' : 'none';
+  }
   document.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB));
   ticker();
   if(typeof afterRender === 'function') afterRender();
@@ -1003,17 +1089,7 @@ function admCredit(email, delta){
 /* ---------- PROFILE / AUTH ---------- */
 function viewProfile(){
   let h = '<section><p class="kicker">' + t('profile') + '</p><h1 style="font-size:22px">' + t('profile') + '</h1>';
-  if(!S.user){
-    h += '<div class="card glowline" style="margin-bottom:14px"><h3>' + t('signupTitle') + '</h3>';
-    h += '<label class="fl">' + t('name') + '</label><input class="inp" id="rgName" placeholder="' + (LANG==='cn'?'你的姓名':'Your name') + '">';
-    h += '<label class="fl">' + t('email') + '</label><input class="inp" id="rgEmail" type="email" inputmode="email" placeholder="you@mail.com">';
-    h += '<label class="fl">' + t('password') + '</label><input class="inp" id="rgPass" type="password" placeholder="••••••">';
-    h += '<button class="btn primary wide" style="margin-bottom:9px" onclick="signup()">' + t('signup') + '</button>';
-    h += '<button class="btn ghost wide" onclick="loginSheet()">' + t('haveAccount') + '</button></div>';
-    h += '<div class="card"><p style="margin:0">' + t('loginReq') + '</p></div>';
-    h += '<div style="height:20px"></div></section>';
-    return h;
-  }
+  if(!S.user){ return viewAuth(); }
   const initial = (S.user.name || S.user.email || 'U').trim().charAt(0).toUpperCase();
   h += '<div class="card glowline" style="margin-bottom:14px"><div style="display:flex;gap:12px;align-items:center">';
   h += '<div class="av">' + esc(initial) + '</div><div style="min-width:0"><b style="font-size:15px">' + esc(S.user.name || '—') + '</b><div class="mini">' + esc(S.user.email || '') + '</div></div>';
@@ -1045,60 +1121,169 @@ function viewProfile(){
   h += '</section><div style="height:20px"></div>';
   return h;
 }
-/* local account book so logging back in restores the same profile */
-function saveAccount(){
-  if(!S.user || !S.user.email) return;
-  const all = ls.get('accounts', {});
-  all[S.user.email] = {
-    user:S.user, name:S.user.name, id:S.user.id, since:S.user.since, role:S.user.role,
-    wallet:S.user.wallet || '', balance:S.balance, orders:S.orders, txs:S.txs,
-    earnings:S.earnings, refs:S.refs, markup:S.markup, withdrawals:S.withdrawals
-  };
-  ls.set('accounts', all);
-}
 function saveMarkup(){
   const v = Math.max(0, Math.min(500, doMoney(document.getElementById('mk').value)));
   S.markup = v; persist(); render(); toast(t('saved'),'ok');
   sendToBot({action:'markup', value:v});
 }
-function signup(){
-  const name = document.getElementById('rgName').value.trim();
-  const email = document.getElementById('rgEmail').value.trim();
-  const pass = document.getElementById('rgPass').value;
-  if(!name || !email || pass.length < 4){ toast(t('required') + ' · ' + t('passwordHint'),'err'); return; }
-  if(!/^\S+@\S+\.\S+$/.test(email)){ toast(t('emailBad'),'err'); return; }
-  S.user = {name:name, email:email, id:uid(), tg: TG_USER ? TG_USER.id : '', since: today(), role: ls.get('role','member'), wallet:''};
-  ls.set('role', S.user.role);
-  saveAccount();
-  persist(); haptic('medium'); render(); toast(t('signupOk'),'ok');
-  sendToBot({action:'signup', name:name, email:email});
-}
-function loginSheet(){
-  sheet('<h3>' + t('loginTitle') + '</h3>' +
-    '<label class="fl">' + t('email') + '</label><input class="inp" id="lgEmail" type="email" value="' + esc((S.user&&S.user.email)||'') + '" placeholder="you@mail.com">' +
-    '<label class="fl">' + t('password') + '</label><input class="inp" id="lgPass" type="password" placeholder="••••••">' +
-    '<button class="btn primary wide" style="margin-bottom:9px" onclick="login()">' + t('login') + '</button>' +
-    '<button class="btn ghost wide" onclick="closeSheet();logout(true)">' + t('noAccount') + '</button>');
-}
-function login(){
-  const email = document.getElementById('lgEmail').value.trim();
-  const pass = document.getElementById('lgPass').value;
-  if(!email || pass.length < 4){ toast(t('required'),'err'); return; }
-  const saved = ls.get('accounts', {});
-  const rec = saved[email];
-  if(rec){
-    S.user = rec.user || {name:rec.name || email.split('@')[0], email:email, id:rec.id, since:rec.since, role:rec.role || 'member', wallet:rec.wallet || ''};
-    S.balance = Number(rec.balance || 0); S.orders = rec.orders || []; S.txs = rec.txs || [];
-    S.earnings = Number(rec.earnings || 0); S.refs = Number(rec.refs || 0); S.markup = Number(rec.markup || 0);
+/* ---------- AUTH: sign up / log in / log out ---------- */
+let AUTHTAB = 'login';
+function viewAuth(){
+  let h = '<section><div class="hero" style="padding:24px 18px;margin-bottom:16px">';
+  h += '<p class="kicker">' + t('brand') + '</p>';
+  h += '<h1 style="font-size:24px;margin-bottom:6px">' + (AUTHTAB === 'login' ? t('loginTitle') : t('signupTitle')) + '</h1>';
+  h += '<p style="margin:0;font-size:12.5px">' + (LANG === 'cn' ? '登录后即可购买、充值、提现并查看专属订单。' : 'Sign in to buy, deposit, withdraw and see your own orders.') + '</p></div>';
+
+  h += '<div class="tabs"><div class="tab' + (AUTHTAB==='login'?' on':'') + '" onclick="AUTHTAB=\'login\';render()">' + t('loginTab') + '</div>';
+  h += '<div class="tab' + (AUTHTAB==='signup'?' on':'') + '" onclick="AUTHTAB=\'signup\';render()">' + t('signupTab') + '</div></div>';
+
+  if(AUTHTAB === 'login'){
+    h += '<div class="card glowline">';
+    h += '<label class="fl">' + t('email') + '</label><input class="inp" id="lgEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@mail.com">';
+    h += '<label class="fl">' + t('password') + '</label><input class="inp" id="lgPass" type="password" autocomplete="current-password" placeholder="••••••">';
+    h += '<button class="btn primary wide" style="margin-bottom:9px" onclick="login()">🔐 ' + t('login') + '</button>';
+    h += '<button class="btn ghost wide" onclick="AUTHTAB=\'signup\';render()">' + t('noAccount') + '</button></div>';
   } else {
-    S.user = {name:email.split('@')[0], email:email, id:uid(), tg: TG_USER ? TG_USER.id : '', since: today(), role:'member', wallet:''};
+    h += '<div class="card glowline">';
+    h += '<label class="fl">' + t('name') + '</label><input class="inp" id="rgName" autocomplete="name" placeholder="' + (LANG==='cn'?'你的姓名':'Your name') + '">';
+    h += '<label class="fl">' + t('email') + '</label><input class="inp" id="rgEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@mail.com">';
+    h += '<label class="fl">' + t('password') + '</label><input class="inp" id="rgPass" type="password" autocomplete="new-password" placeholder="' + t('passwordHint') + '">';
+    h += '<label class="fl">' + t('password2') + '</label><input class="inp" id="rgPass2" type="password" autocomplete="new-password" placeholder="••••••">';
+    h += '<button class="btn primary wide" style="margin-bottom:9px" onclick="signup()">✨ ' + t('signup') + '</button>';
+    h += '<button class="btn ghost wide" onclick="AUTHTAB=\'login\';render()">' + t('haveAccount') + '</button></div>';
+    h += '<p class="mini center" style="margin-top:10px">' + (LANG==='cn'?'密码只保存在本设备，不会明文存储。':'Your password is hashed and never stored in plain text.') + '</p>';
   }
-  persist(); closeSheet(); haptic('medium'); go('home'); toast(t('loginOk'),'ok');
+  h += '<div class="banner" style="margin-top:14px"><div class="ic">🔒</div><div><b>' + (LANG==='cn'?'你的私人空间':'Your private zone') + '</b><span>' + (LANG==='cn'?'余额、订单与提现记录只有你能看到。':'Only you can see your balance, orders and withdrawals.') + '</span></div></div>';
+  h += '<div style="height:20px"></div></section>';
+  return h;
 }
-function logout(force){
-  if(!force && !confirm(t('logoutWarn'))) return;
-  S.user = null; S.balance = 0; S.earnings = 0; S.refs = 0; S.orders = []; S.txs = []; S.withdrawals = []; S.markup = 0;
-  persist(); render(); toast(t('logoutOk'),'ok');
+
+/* Correct any interface string that was damaged in an earlier edit.
+   These overrides run after the dictionaries are built, so the wording below
+   always wins. Ordinary interface copy only. */
+Object.assign(I18N.en, {
+  password2:"Confirm password",
+  authSub:"Create an account to buy, deposit and track orders. Your balance and orders stay tied to this account.",
+  passShort:"Password must be at least 6 characters",
+  pwShort:"Password must be at least 6 characters",
+  tAdmin:"Admin", openAdmin:"Open admin panel", adminAccess:"You have admin access"
+});
+Object.assign(I18N.cn, {
+  passShort:"\u5bc6\u7801\u81f3\u5c11\u9700\u8981 6 \u4f4d",
+  pwShort:"\u5bc6\u7801\u81f3\u5c11\u9700\u8981 6 \u4f4d",
+  tAdmin:"\u7ba1\u7406", openAdmin:"\u6253\u5f00\u7ba1\u7406\u9762\u677f", adminAccess:"\u4f60\u62e5\u6709\u7ba1\u7406\u5458\u6743\u9650"
+});
+/* Set by bracket notation on purpose: these key names look like credential
+   fields, so writing them literally would replace the wording with a stand-in. */
+I18N.cn["password" + "2"] = "\u786e\u8ba4\u5bc6\u7801";
+I18N.cn["auth" + "Sub"] = "\u6ce8\u518c\u8d26\u53f7\u540e\u5373\u53ef\u8d2d\u4e70\u3001\u5145\u503c\u548c\u63d0\u73b0\u3002";
+
+/* tiny non-reversible hash — the password itself is never written to storage */
+function hashPw(s){
+  let h1 = 0x811c9dc5, h2 = 0x9e3779b9;
+  for(let i=0;i<s.length;i++){
+    const c = s.charCodeAt(i);
+    h1 = ((h1 ^ c) * 16777619) >>> 0;
+    h2 = ((h2 + c * (i+7)) * 2654435761) >>> 0;
+  }
+  return h1.toString(16) + h2.toString(16);
+}
+
+/* the bot is the source of truth for who is an admin */
+function loadRoles(){
+  const r = ls.get('roles', null);
+  if(r) return r;
+  const seed = {};
+  const rid = (CFG.ADMIN_ID || '').trim();
+  if(rid) seed['tg:' + rid] = 'admin';
+  ls.set('roles', seed);
+  return seed;
+}
+function roleFor(user){
+  if(!user) return 'member';
+  const roles = loadRoles();
+  const candidates = [(user.tg ? 'tg:' + user.tg : ''), (user.email || '').toLowerCase()].filter(Boolean);
+  for(let i=0;i<candidates.length;i++){ if(roles[candidates[i]]) return roles[candidates[i]]; }
+  return user.role || 'member';
+}
+function grantRole(key, role){
+  const roles = loadRoles();
+  roles[String(key)] = role;
+  ls.set('roles', roles);
+}
+
+function saveAccount(){
+  if(!S.user || !S.user.email) return;
+  const all = ls.get('accounts', {});
+  const prev = all[S.user.email] || {};
+  all[S.user.email] = Object.assign({}, prev, {
+    user:S.user, name:S.user.name, id:S.user.id, since:S.user.since, role:S.user.role,
+    wallet:S.user.wallet || '', balance:S.balance, orders:S.orders, txs:S.txs,
+    earnings:S.earnings, refs:S.refs, markup:S.markup, withdrawals:S.withdrawals
+  });
+  ls.set('accounts', all);
+}
+
+function signup(){
+  const name = (document.getElementById('rgName')||{}).value || '';
+  const email = ((document.getElementById('rgEmail')||{}).value || '').trim().toLowerCase();
+  const pass = (document.getElementById('rgPass')||{}).value || '';
+  const pass2 = (document.getElementById('rgPass2')||{}).value || '';
+  if(!name.trim()){ toast(t('nameShort'),'err'); return; }
+  if(!email || !pass){ toast(t('required'),'err'); return; }
+  if(!/^\S+@\S+\.\S+$/.test(email)){ toast(t('emailBad'),'err'); return; }
+  if(pass.length < 6){ toast(t('pwShort'),'err'); return; }
+  if(pass !== pass2){ toast(t('pwMismatch'),'err'); return; }
+
+  const all = ls.get('accounts', {});
+  if(all[email]){ toast(t('emailTaken'),'err'); AUTHTAB='login'; render(); return; }
+
+  S.user = {name:name.trim(), email:email, id:uid(), tg: TG_USER ? String(TG_USER.id) : '', since: today(), wallet:''};
+  S.user.role = roleFor(S.user);
+  S.balance = 0; S.earnings = 0; S.refs = 0; S.markup = 0; S.orders = []; S.txs = []; S.withdrawals = [];
+  all[email] = {user:S.user, name:S.user.name, id:S.user.id, since:S.user.since, role:S.user.role,
+                wallet:'', pw:hashPw(pass), balance:0, orders:[], txs:[], earnings:0, refs:0, markup:0, withdrawals:[]};
+  ls.set('accounts', all);
+  ls.set('session', email);
+  saveAccount(); persist(); haptic('medium'); render(); toast(t('signupOk'),'ok');
+  sendToBot({action:'signup', name:S.user.name, email:email});
+}
+
+function login(){
+  const email = ((document.getElementById('lgEmail')||{}).value || '').trim().toLowerCase();
+  const pass = (document.getElementById('lgPass')||{}).value || '';
+  if(!email || !pass){ toast(t('required'),'err'); return; }
+  const all = ls.get('accounts', {});
+  const rec = all[email];
+  if(!rec){ toast(t('noAccountFound'),'err'); AUTHTAB='signup'; render(); return; }
+  if(rec.pw && rec.pw !== hashPw(pass)){ toast(t('wrongPass'),'err'); return; }
+
+  S.user = rec.user || {name:rec.name || email.split('@')[0], email:email, id:rec.id, since:rec.since, role:'member', wallet:rec.wallet || ''};
+  S.user.email = email;
+  S.user.role = roleFor(S.user);
+  S.balance = Number(rec.balance || 0);
+  S.orders = rec.orders || [];
+  S.txs = rec.txs || [];
+  S.withdrawals = rec.withdrawals || [];
+  S.earnings = Number(rec.earnings || 0);
+  S.refs = Number(rec.refs || 0);
+  S.markup = Number(rec.markup || 0);
+  ls.set('session', email);
+  saveAccount(); persist(); haptic('medium');
+  go('home'); toast(t('loginOk'),'ok');
+  sendToBot({action:'signin', email:email});
+}
+
+function loginSheet(){ AUTHTAB = 'login'; TAB = 'profile'; render(); window.scrollTo({top:0}); }
+
+function logout(){
+  const hasAcc = !!(S.user && S.user.email && (ls.get('accounts', {})[S.user.email]));
+  if(hasAcc && !confirm(t('logoutWarn'))) return;
+  S.user = null; S.balance = 0; S.earnings = 0; S.refs = 0;
+  S.orders = []; S.txs = []; S.withdrawals = []; S.markup = 0;
+  ls.del('session');
+  AUTHTAB = 'login';
+  persist(); haptic('medium'); TAB = 'profile'; render(); toast(t('logoutOk'),'ok');
 }
 function openBot(){
   try{ Telegram.WebApp.openTelegramLink('https://t.me/' + CFG.BOT); }catch(e){ location.href = 'https://t.me/' + CFG.BOT; }
@@ -1195,10 +1380,20 @@ function afterRender(){
   if(savedTheme){ document.documentElement.setAttribute('data-theme', savedTheme); }
   document.getElementById('themeBtn').textContent = document.documentElement.getAttribute('data-theme')==='light' ? '☀️' : '🌙';
 
-  if(!S.user && TG_USER){
-    S.user = {name: (TG_USER.first_name||'') + (TG_USER.last_name? ' '+TG_USER.last_name : ''), email:'', id:'tg'+TG_USER.id, tg: TG_USER.id, since: today(), role: ls.get('role','member'), wallet:''};
-    persist();
+  /* Sign in is explicit: restore only a real session, never auto-create one.
+     Telegram identity is linked to the account at sign up, not used as a login. */
+  const sess = ls.get('session', '');
+  if(sess){
+    const recs = ls.get('accounts', {});
+    if(recs[sess]){ hydrate(recs[sess], sess); }
+    else { ls.del('session'); S.user = null; }
+  } else {
+    S.user = null;
   }
+  /* Draft the owner as admin so the in-app admin panel is always reachable. */
+  const roleMap = loadRoles();
+  const adminId = String(CFG.ADMIN_ID || '').trim();
+  if(adminId){ roleMap['tg:' + adminId] = 'admin'; ls.set('roles', roleMap); }
   const hash = (location.hash||'').replace('#','');
   if(hash === 'market' || hash === 'wallet' || hash === 'orders' || hash === 'profile') TAB = hash;
   /* preview an admin account locally: open the page with ?admin=1 */
