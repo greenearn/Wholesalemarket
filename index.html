@@ -252,7 +252,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6qfhh8Eu109xYDPxVNyUn40uaAXXejtu78iLPie6CZGjJCVm9FoJL0GQ9Rsv9oSQJl8AbV6V9X6ySX-_pr0JTd9sOvD6TRsP3FvoM2NON8Oli1yyUSg8C9TP47AT-hlTZWoppRvj6AqAY1lHUQUH0XqYOl3i9ks2a4FaQrqBT6ZF-Po9nk1QP_1S4hejfHZrrSc7",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6v_kRzz_1tbDuHYhJct1wTdlI3p_2FY-DEmdUHuJdNE6X6v7bl7ITOYVbH8U1VJU7Q4EGxizd3QEZ97FcOW7vmhqKT0L5yD9i_axVGL_oTax7FpcO0smDnypS4rGfhXMs2h3CJn_amt89UlNrsGpD78XWsSsPjslrCOVhvkGrNMXsRQaowCyJmqzUXkZ80kjdrJZ",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -311,7 +311,8 @@ uq: '',
 loadingUsers: false,
 uStats: null, uFilter: 'all', uDetail: null, uLoading: false, uTab: 'info',
 teamData: null, teamLoading: false,
-usersErr: null, uqFocus: 0, loadingCatalog: false, catalogErr: null, teamErr: null
+usersErr: null, uqFocus: 0, loadingCatalog: false, catalogErr: null, teamErr: null,
+members: null, loadingMembers: false
 };
 function persist(){
 ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
@@ -401,10 +402,18 @@ h += '<p style="max-width:34ch">' + t('heroSub') + '</p>';
 h += '<div class="cta"><button class="btn primary" onclick="go(\'market\')">🛍 ' + t('browse') + '</button>';
 h += S.user ? '<button class="btn ghost" onclick="go(\'wallet\')">💰 ' + money(S.balance) + '</button>' : '<button class="btn ghost" onclick="go(\'profile\')">' + t('signup') + '</button>';
 h += '</div></section>';
+if(S.members && S.members.total > 0){
+h += '<div class="card" style="padding:12px;margin-top:14px;display:flex;align-items:center;gap:10px">';
+h += '<div style="font-size:22px">👥</div><div style="flex:1"><b style="font-size:14px">' + S.members.total + ' ' + (LANG==='cn'?'位会员':'members') + '</b>';
+h += '<div class="mini">' + (LANG==='cn'
+? (S.members.online + ' 人在线 · 今日新增 ' + S.members.fresh)
+: (S.members.online + ' online now · ' + S.members.fresh + ' joined today')) + '</div></div>';
+h += '</div>';
+}
 h += '<div class="grid3" style="margin-top:14px">';
 h += '<div class="stat"><b>' + (S.cats||[]).length + '</b><span>' + t('statCats') + '</span></div>';
 h += '<div class="stat"><b>' + live + '</b><span>' + t('statItems') + '</span></div>';
-h += '<div class="stat"><b>24/7</b><span>' + t('statSupport') + '</span></div>';
+h += '<div class="stat"><b>' + (S.members ? S.members.total : '24/7') + '</b><span>' + (S.members ? (LANG==='cn'?'会员':'Members') : t('statSupport')) + '</span></div>';
 h += '</div>';
 h += '<div class="sec"><div><h2>' + t('cats') + '</h2><p style="margin:0">' + t('marketSub') + '</p></div><span class="more" onclick="go(\'market\')">' + t('viewAll') + ' →</span></div>';
 h += '<div class="grid2">';
@@ -635,11 +644,60 @@ fetch(CFG.API + '/deposit', {method:'POST', headers:{'Content-Type':'application
 } else openIt();
 closeSheet();
 }
+let SHOT_DATA = '';
 function manualDeposit(){
 const amt = doMoney((document.getElementById('depAmt')||{}).value || 0);
-closeSheet();
-sendToBot({action:'deposit_manual', amount:amt, method:DEP_METHOD});
-toast(LANG==='cn'?'已通知客服，请在机器人对话中发送交易号':'Support notified — send the transaction hash in the bot chat','ok');
+SHOT_DATA = '';
+sheet('<h3>🧾 ' + (LANG==='cn'?'手动充值':'Manual deposit') + '</h3>' +
+'<p class="mini">' + (LANG==='cn'
+? '填写金额与币种，上传付款截图。管理员核对到账后为你入账。'
+: 'Enter the amount and the coin, then attach a screenshot of the payment. An admin checks it and credits your balance.') + '</p>' +
+'<label class="fl">' + t('depositAmount') + ' (USD)</label>' +
+'<input class="inp" id="mdAmt" type="number" inputmode="decimal" placeholder="50" value="' + (amt>0?amt:50) + '">' +
+'<label class="fl">' + t('method') + '</label>' +
+'<input class="inp" id="mdMethod" placeholder="USDT TRC20 / BTC / bank transfer">' +
+'<label class="fl">' + (LANG==='cn'?'备注或交易号':'Note or transaction hash') + '</label>' +
+'<input class="inp" id="mdNote" placeholder="' + (LANG==='cn'?'可留空':'optional') + '">' +
+'<label class="fl">' + (LANG==='cn'?'付款截图':'Payment screenshot') + '</label>' +
+'<input class="inp" id="mdShot" type="file" accept="image 
+const max = 1000;
+let w = im.width, h = im.height;
+if(w > max || h > max){ const r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+cv.getContext('2d').drawImage(im, 0, 0, w, h);
+SHOT_DATA = cv.toDataURL('image/jpeg', 0.7);
+const p = document.getElementById('mdPrev');
+if(p){ p.innerHTML = '<img src="' + SHOT_DATA + '" style="width:100%;border-radius:10px;margin-top:8px">'; }
+}catch(e){ SHOT_DATA = fr.result; }
+};
+im.onerror = function(){ SHOT_DATA = fr.result; };
+im.src = fr.result;
+};
+fr.readAsDataURL(f);
+}
+function manualSend(){
+const amt = doMoney((document.getElementById('mdAmt')||{}).value || 0);
+if(amt <= 0){ toast(t('required'),'err'); return; }
+if(!SHOT_DATA){ toast(LANG==='cn'?'请上传付款截图':'Attach the payment screenshot first','err'); return; }
+const method = ((document.getElementById('mdMethod')||{}).value || 'manual').trim();
+const note = ((document.getElementById('mdNote')||{}).value || '').trim();
+const base = apiBase();
+if(!base){ toast(LANG==='cn'?'未连接机器人，请先发送 /start':'Not connected to the bot','err'); return; }
+toast(LANG==='cn'?'正在提交…':'Submitting…','ok');
+fetch(base, {method:'POST', headers:{'Content-Type':'application/json'},
+body: JSON.stringify({action:'deposit_proof', user:userId(),
+init:(function(){ try{ return Telegram.WebApp.initData; }catch(e){ return ''; } })(),
+amount:amt, method:method, note:note, image:SHOT_DATA})})
+.then(function(r){ return r.json(); })
+.then(function(d){
+if(d && d.ok){
+closeSheet(); SHOT_DATA = '';
+toast(LANG==='cn'?'已提交，等待管理员核对':'Submitted — an admin will review it','ok');
+} else {
+toast((d && d.error) ? String(d.error) : (LANG==='cn'?'提交失败':'Could not submit'),'err');
+}
+})
+.catch(function(e){ toast(LANG==='cn'?'网络错误，请重试':'Network error — please try again','err'); });
 }
 function withdrawSheet(){
 if(!S.user){ toast(t('loginReq'),'err'); go('profile'); return; }
@@ -881,6 +939,22 @@ persist(); render();
 }
 })
 .catch(function(e){});
+}
+function loadPublicMembers(){
+const base = apiBase();
+if(!base || S.loadingMembers) return;
+S.loadingMembers = true;
+fetch(base, {method:'POST', headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:'members', public:true})})
+.then(function(r){ return r.json(); })
+.then(function(d){
+S.loadingMembers = false;
+if(d && d.ok){
+S.members = {total:Number(d.members)||0, online:Number(d.online)||0, fresh:Number(d.new_today)||0};
+render();
+}
+})
+.catch(function(e){ S.loadingMembers = false; });
 }
 function callApi(action, extra){
 if(!hasApi()) return Promise.resolve({ok:false, error:(LANG==='cn'?'请先填写接口地址与密钥':'Add the API address and key first')});
@@ -1674,6 +1748,7 @@ applyI18n();
 go(TAB);
 syncState();
 loadPublicCatalog();
+loadPublicMembers();
 })();
 </script>
 <script>
