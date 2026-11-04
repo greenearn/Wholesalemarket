@@ -252,7 +252,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6xHPSb2nSr3ibIuNpVYzk6tmGCz0HKAbfRcJUd-UXcp5V3D7wjQ_MBdRPkmFDyUs8YSXa9Bz8CWxTx93WrLII5xIG984B1dTAz6MbqgAUSA2-uQ5ow6JxmtkMZQFDZn9WceD-Bqk7ga54y6I1F_t9MAaPD-V97HTSBjoOCXlbK12Zvx2qYBmy3DeLBuYP_3iuyqT",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6xZ7Xnwps1GqyNePGpUPUnbCJKIcemxCti3pQz7ZcFPRBGfw6C3YU_1jziJRdqCuxwXRr6e1kzHuIT6BiU3x7JlsQ3pbXxjPx5cGTG-yKxcebNiaesRNBPrLmF7o81Rl8O_rglIfOg9oe5B34dU64RB_Hx0MvePG0jW57WHxME_Yv_9mmuJqXesPHVgq4u6gpr70",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -312,7 +312,7 @@ loadingUsers: false,
 uStats: null, uFilter: 'all', uDetail: null, uLoading: false, uTab: 'info',
 teamData: null, teamLoading: false,
 usersErr: null, uqFocus: 0, loadingCatalog: false, catalogErr: null, teamErr: null,
-members: null, loadingMembers: false
+members: null, loadingMembers: false, catalogTried: 0
 };
 function persist(){
 ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
@@ -320,11 +320,9 @@ ls.set('refs', S.refs); ls.set('orders', S.orders); ls.set('txs', S.txs);
 ls.set('withdrawals', S.withdrawals); ls.set('markup', S.markup);
 ls.set('cats', S.cats); ls.set('items', S.items);
 }
-const SEED_CATS = [];
-const SEED_ITEMS = [];
 (function seed(){
-if(!S.cats) { S.cats = SEED_CATS; }
-if(!S.items){ S.items = SEED_ITEMS.map(x => Object.assign({active:true}, x)); }
+if(!S.cats) { S.cats = []; }
+if(!S.items){ S.items = []; }
 })();
 function priceOf(item){
 const base = Number(item.price)||0;
@@ -362,6 +360,7 @@ else if(TAB === 'product') out = viewProduct();
 else if(TAB === 'refer') out = viewRefer();
 else if(TAB === 'admin') out = viewAdmin();
 v.innerHTML = out;
+if(out && out.length > 40 && window.hideBootErr){ try{ window.hideBootErr(); }catch(e){} }
 const admTab = document.getElementById('tbAdmin');
 if(admTab){
 const canSee = isAdmin();
@@ -378,7 +377,6 @@ const bits = [
 '🔐 ' + (LANG==='cn'?'人工核验库存':'Human-verified stock'),
 '🌍 ' + (LANG==='cn'?'全球交付 · 中英文客服':'Worldwide delivery · EN / 中文 support'),
 '🎁 ' + (LANG==='cn'?'推荐返佣 '+CFG.REF_PERCENT+'%':'Refer &amp; earn '+CFG.REF_PERCENT+'%'),
-'💳 ' + (LANG==='cn'?'加密货币自动充值':'Crypto deposits auto-confirmed'),
 '📦 <b>' + (S.items||[]).length + '</b> ' + (LANG==='cn'?'件商品在售':'products live')
 ];
 const line = bits.join(' &nbsp;•&nbsp; ');
@@ -943,8 +941,17 @@ if(!S.rights) return true;
 return S.rights.indexOf(need) >= 0;
 }
 function loadPublicCatalog(){
+if(S.catalogLive) return;
 const base = apiBase();
-if(!base || S.catalogLive) return;
+if(!base){
+S.catalogErr = (LANG==='cn'
+? '小程序未连接机器人数据库，请在机器人内发送 /start 后重新打开'
+: 'This copy of the app is not connected to the bot. Open it from the bot, or send /getapp for a fresh file.');
+render();
+return;
+}
+if(S.catalogTried >= 3){ return; }
+S.catalogTried++;
 fetch(base, {method:'POST', headers:{'Content-Type':'application/json'},
 body:JSON.stringify({action:'catalog', public:true})})
 .then(function(r){ return r.json(); })
@@ -953,10 +960,18 @@ if(d && d.ok){
 if(Array.isArray(d.cats) && d.cats.length){ S.cats = d.cats; }
 if(Array.isArray(d.items) && d.items.length){ S.items = d.items; }
 S.catalogLive = true;
+S.catalogErr = null;
 persist(); render();
+return;
 }
+S.catalogErr = (d && d.error) ? String(d.error) : (LANG==='cn'?'未能读取商品':'Could not read the products');
+render();
 })
-.catch(function(e){});
+.catch(function(e){
+S.catalogErr = (LANG==='cn'?'正在连接机器人…':'Connecting to the bot…');
+render();
+setTimeout(loadPublicCatalog, 2500);
+});
 }
 function loadPublicMembers(){
 const base = apiBase();
@@ -1782,7 +1797,7 @@ if(v && v.innerHTML.replace(/\s/g,'').length > 0) return;
 if(document.getElementById('bootErr')) return;
 var box = document.createElement('div');
 box.id = 'bootErr';
-box.style.cssText = 'position:fixed;left:12px;right:12px;top:64px;z-index:999;background:#200d16;border:1px solid #fb7185;border-radius:14px;padding:14px;color:#fff;font-size:13px;line-height:1.5;font-family:system-ui,sans-serif';
+box.style.cssText = 'position:fixed;left:12px;right:12px;top:64px;z-index:999;background:#200d16;border:1px solid #fb7185;border-radius:14px;padding:14px;color:#fff;font-size:13px;line-height:1.5';
 box.innerHTML = '<b>⚠️ The shop could not be drawn</b><div style="margin-top:6px;color:#fda4af;font-size:12px">' + String(msg).replace(/</g,'&lt;') + '</div><div style="margin-top:8px;color:#94a3b8;font-size:11px">Send /getapp in the bot and re-upload the new index.html.</div><div style="margin-top:10px"><button onclick="hideBootErr()" style="background:transparent;border:1px solid #fb7185;color:#fda4af;border-radius:9px;padding:6px 12px;font-size:12px">✕ Close</button></div>';
 document.body.appendChild(box);
 }
