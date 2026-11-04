@@ -252,7 +252,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6qC6x4S5aUCwAvoMl-otkBKeEghzQY9vNg7G9MkQaB2sHT6Vw46xsZ5WLULDzQY5q9rkFPK74K5mT43DMLL979Vxa1TBPuUGWpGw_1KCPkf-q5h7Ud21UOQ9HV5MJS_TxExS3Bf3pyf198saGHPsZu06-OtIGhGu3YazdzRx2mPYzKdWaPv5asAN-SzJLqQcy4Al",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6qfhh8Eu109xYDPxVNyUn40uaAXXejtu78iLPie6CZGjJCVm9FoJL0GQ9Rsv9oSQJl8AbV6V9X6ySX-_pr0JTd9sOvD6TRsP3FvoM2NON8Oli1yyUSg8C9TP47AT-hlTZWoppRvj6AqAY1lHUQUH0XqYOl3i9ks2a4FaQrqBT6ZF-Po9nk1QP_1S4hejfHZrrSc7",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -310,7 +310,8 @@ liveTeam: null,
 uq: '',
 loadingUsers: false,
 uStats: null, uFilter: 'all', uDetail: null, uLoading: false, uTab: 'info',
-teamData: null, teamLoading: false
+teamData: null, teamLoading: false,
+usersErr: null, uqFocus: 0, loadingCatalog: false, catalogErr: null, teamErr: null
 };
 function persist(){
 ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
@@ -702,7 +703,7 @@ return '<section><div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?
 }
 let h = '<section><div class="back" onclick="go(\'profile\')">← ' + t('back') + '</div>';
 h += '<p class="kicker">' + t('admin') + '</p><h1 style="font-size:22px">' + t('admin') + '</h1>';
-h += '<div class="mini" style="margin:-4px 0 10px">build 2026-11-03 · users + team + activity</div>';
+h += '<div class="mini" style="margin:-4px 0 10px">build R2 · users tab fixed · tap a name to open their file</div>';
 h += '<div class="tabs">';
 const tabs = [['users','👥 ' + (LANG==='cn'?'用户':'Users')],['products','🧩 ' + t('items')],['cats','🗂 ' + t('statCats')],['orders','🛒 ' + t('orders')],['team','🎖 ' + (LANG==='cn'?'权限':'Team')]];
 tabs.forEach(x => { h += '<div class="tab' + (ADM.tab===x[0]?' on':'') + '" onclick="ADM.tab=\'' + x[0] + '\';ADM.edit=null;render()">' + x[1] + '</div>'; });
@@ -719,20 +720,34 @@ return h;
 function loadCatalog(force){
 if(!hasApi()) return;
 if(S.catalogLive && !force) return;
+if(S.loadingCatalog && !force) return;
+if(S.catalogErr && !force) return;
+S.loadingCatalog = true;
 callApi('catalog').then(function(d){
+S.loadingCatalog = false;
 if(d && d.ok){
 if(Array.isArray(d.cats) && d.cats.length){ S.cats = d.cats; }
 if(Array.isArray(d.items) && d.items.length){ S.items = d.items; }
 S.catalogLive = true;
+S.catalogErr = null;
 persist(); render();
+} else {
+S.catalogErr = (d && d.error) ? String(d.error) : (LANG==='cn'?'未能读取商品':'Could not read the catalog');
+render();
 }
 });
+}
+function errBar(msg, retryFn){
+if(!msg) return '';
+return '<div class="empty"><span class="e">⚠️</span>' + esc(msg) +
+'<div style="margin-top:12px"><button class="btn primary" onclick="S.catalogErr=null;loadCatalog(true)">🔄 ' + (LANG==='cn'?'重试':'Try again') + '</button></div></div>';
 }
 function admProducts(){
 if(!can('products')) return '<div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'没有该权限':'No right for this') + '</div>';
 loadCatalog();
 if(ADM.edit) return admEditItem(ADM.edit);
 let h = apiBar();
+if(S.catalogErr) return h + errBar(S.catalogErr);
 h += '<div class="split" style="margin-bottom:12px"><button class="btn primary sm" onclick="ADM.edit=\'new\';render()">➕ ' + (LANG==='cn'?'新增商品':'Add product') + '</button>';
 h += '<button class="btn ghost sm" onclick="loadCatalog(true)">🔄 ' + (LANG==='cn'?'刷新':'Refresh') + '</button></div>';
 h += (S.items||[]).map(it => {
@@ -811,6 +826,7 @@ function admCats(){
 if(!can('products')) return '<div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'没有该权限':'No right for this') + '</div>';
 loadCatalog();
 let h = apiBar();
+if(S.catalogErr) return h + errBar(S.catalogErr);
 h += '<button class="btn primary sm wide" style="margin-bottom:12px" onclick="admNewCat()">➕ ' + (LANG==='cn'?'新增分类':'Add category') + '</button>';
 h += (S.cats||[]).map(c => {
 const n = itemsIn(c.id).length;
@@ -915,11 +931,19 @@ render();
 function loadUsers(force){
 if(!hasApi()) return;
 if(S.liveUsers && !force) return;
+if(S.loadingUsers && !force) return;
+if(S.usersErr && !force) return;
 S.loadingUsers = true; render();
 callApi('users').then(function(d){
 S.loadingUsers = false;
-if(d && d.ok){ S.liveUsers = d.users || []; S.uStats = {total:d.total, online:d.online}; render(); }
-else { S.loadingUsers = false; render(); }
+if(d && d.ok){
+S.liveUsers = d.users || [];
+S.uStats = {total:d.total, online:d.online};
+S.usersErr = null;
+} else {
+S.usersErr = (d && d.error) ? String(d.error) : (LANG==='cn'?'未能读取用户列表':'Could not read the user list');
+}
+render();
 });
 }
 function ago(ts){
@@ -1023,18 +1047,26 @@ render();
 }
 });
 }
+function admTeamReload(){
+S.teamData = null; S.teamErr = null; S.teamLoading = false;
+render();
+}
 function admTeam(){
 if(!can('subadmins')) return '<div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?'没有该权限':'No right for this') + '</div>';
 var d = S.teamData;
 if(!d){
-if(!S.teamLoading){
+if(S.teamLoading) return '<div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px"></div>';
+if(S.teamErr){
+return '<div class="empty"><span class="e">⚠️</span>' + esc(S.teamErr) +
+'<div style="margin-top:12px"><button class="btn primary" onclick="S.teamErr=null;admTeamReload()">🔄 ' + (LANG==='cn'?'重试':'Try again') + '</button></div></div>';
+}
 S.teamLoading = true;
 callApi('perms', {}).then(function(r){
 S.teamLoading = false;
-if(r && r.ok){ S.teamData = r; }
+if(r && r.ok){ S.teamData = r; S.teamErr = null; }
+else { S.teamErr = (r && r.error) ? String(r.error) : (LANG==='cn'?'未能读取权限':'Could not read rights'); }
 render();
 });
-}
 return '<div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px"></div>';
 }
 var all = d.all || ['products','orders','users','wallet','message','broadcast','ads','settings','subadmins'];
@@ -1089,7 +1121,15 @@ return h + '<div class="empty"><span class="e">🔌</span>' + (LANG==='cn'
 : 'Connect to the bot to see every customer. A phone can only ever see its own accounts.') +
 '<div style="margin-top:14px"><button class="btn primary" onclick="apiSheet()">🔌 ' + (LANG==='cn'?'填写接口':'Set up connection') + '</button></div></div>';
 }
-if(S.loadingUsers || !S.liveUsers){
+if(S.usersErr){
+h += '<div class="empty"><span class="e">⚠️</span>' + esc(S.usersErr) +
+'<div style="margin-top:12px"><button class="btn primary" onclick="S.usersErr=null;loadUsers(true)">🔄 ' + (LANG==='cn'?'重试':'Try again') + '</button></div></div>';
+return h;
+}
+if(S.loadingUsers){
+return h + '<div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px"></div>';
+}
+if(!S.liveUsers){
 loadUsers();
 return h + '<div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px"></div>';
 }
@@ -1124,13 +1164,13 @@ for(var c=0;c<chips.length;c++){
 h += '<div class="chip' + (S.uFilter===chips[c][0]?' on':'') + '" onclick="custFilter(\'' + chips[c][0] + '\')">' + chips[c][1] + '</div>';
 }
 h += '</div>';
-h += '<input class="inp" placeholder="' + (LANG==='cn'?'搜索姓名 / 用户名 / 邮箱 / ID':'Search name, username, email or id') + '" oninput="S.uq=this.value;render()" value="' + esc(S.uq||'') + '" style="margin-bottom:12px">';
+h += '<input class="inp" id="uqInp" placeholder="' + (LANG==='cn'?'搜索姓名 / 用户名 / 邮箱 / ID':'Search name, username, email or id') + '" oninput="S.uq=this.value;S.uqFocus=1;render()" onblur="S.uqFocus=0" value="' + esc(S.uq||'') + '" style="margin-bottom:12px">';
 var q = (S.uq||'').toLowerCase();
 var list = all.filter(function(u){
 if(S.uFilter === 'online' && !u.online) return false;
 if(S.uFilter === 'new' && String(u.joined||'') !== today) return false;
 if(S.uFilter === 'buyers' && !((Number(u.orders_n)||0) > 0)) return false;
-if(S.uFilter === 'money' && !(Number(u.balance)||0 > 0)) return false;
+if(S.uFilter === 'money' && !((Number(u.balance)||0) > 0)) return false;
 if(!q) return true;
 return (u.name||'').toLowerCase().indexOf(q)>=0 || (u.email||'').toLowerCase().indexOf(q)>=0 ||
 (u.username||'').toLowerCase().indexOf(q)>=0 || String(u.id).indexOf(q)>=0 ||
@@ -1590,6 +1630,14 @@ setTimeout(()=>{ r.style.transform='scale(2.4)'; r.style.opacity='0'; setTimeout
 });
 const q = document.getElementById('q');
 if(q && MARKET.q && !q.dataset.f){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); q.dataset.f = '1'; }
+const uq = document.getElementById('uqInp');
+if(uq && S.uqFocus){
+try{
+uq.focus();
+const n = uq.value.length;
+uq.setSelectionRange(n, n);
+}catch(e){}
+}
 }
 (function boot(){
 try{
