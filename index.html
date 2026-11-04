@@ -517,7 +517,7 @@ const S = {
   liveTeam: null,
   uq: '',
   loadingUsers: false,
-  uStats: null
+  uStats: null, uFilter: 'all', uDetail: null, uLoading: false, uTab: 'info'
 };
 function persist(){
   ls.set('user', S.user); ls.set('balance', S.balance); ls.set('earnings', S.earnings);
@@ -957,7 +957,7 @@ function viewAdmin(){
   if(ADM.tab === 'products') h += admProducts();
   else if(ADM.tab === 'cats') h += admCats();
   else if(ADM.tab === 'orders') h += admOrders();
-  else h += admUsers();
+  else h += admCustomers();
   h += '</section><div style="height:20px"></div>';
   return h;
 }
@@ -1240,6 +1240,320 @@ function uSend(id){
   if(!txt){ toast(t('required'),'err'); return; }
   callApi('msg', {id:id, text:txt}).then(function(d){ if(d && d.ok){ toast(t('saved'),'ok'); closeSheet(); } });
 }
+/* ================= CUSTOMER FILE =================
+   Everything the admin needs about one person: who they are, what they bought,
+   what they paid, what they owe, every balance change and every action. All of
+   it comes from the bot, so it is the same on every device. */
+function money2(v){ try{ return money(Number(v)||0); }catch(e){ return '$' + (Number(v)||0).toFixed(2); } }
+function when(ts){
+  try{
+    if(!ts) return '—';
+    var d = new Date(Number(ts)*1000);
+    var p = function(n){ return (n<10?'0':'')+n; };
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }catch(e){ return '—'; }
+}
+function custOpen(id){
+  try{ haptic('light'); }catch(e){}
+  S.uOpen = String(id); S.uTab = 'info'; S.uq2 = '';
+  /* Open a clean file: a stale balance or a previous user's history must never
+     be shown while the real record is still loading. */
+  S.uDetail = null; S.uErr = null; S.uTried = null; S.uLoading = false;
+  render(); custFetch(String(id));
+}
+function custBack(){
+  S.uOpen = null; S.uDetail = null; S.uErr = null; S.uTried = null; S.uLoading = false;
+  render();
+}
+function custTab(t){ S.uTab = t; render(); }
+function custFetch(id){
+  if(!hasApi()) return;
+  if(S.uTried === String(id) && S.uLoading) return;   /* never fetch twice at once */
+  S.uTried = String(id);
+  S.uLoading = true; render();
+  callApi('user', {id:String(id)}).then(function(d){
+    S.uLoading = false;
+    if(d && d.ok){ S.uDetail = d.user; }
+    else { S.uErr = (LANG==='cn'?'无法读取该用户':'Could not load this customer'); }
+    render();
+  });
+}
+function custFilter(f){ S.uFilter = f; render(); }
+function custAct(id, mode){
+  var a = document.getElementById('cAmt');
+  var r = document.getElementById('cReason');
+  var amt = doMoney(a ? a.value : 0);
+  var reason = r ? (r.value||'').trim() : '';
+  if(!amt || amt <= 0){ toast((LANG==='cn'?'请输入金额':'Enter an amount'),'err'); return; }
+  if(mode === 'debit'){
+    var cur = 0;
+    try{ cur = Number((S.uDetail||{}).balance)||0; }catch(e){ cur = 0; }
+    if(amt > cur){ if(!confirm((LANG==='cn'?'扣款超过该用户余额，继续？':'This is more than their balance. Continue?'))) return; }
+  }
+  callApi(mode, {id:String(id), amount:amt, reason:reason}).then(function(d){
+    if(d && d.ok){
+      toast((mode==='credit'?'✅ +':'✅ −') + money2(amt) + ' → ' + money2(d.balance),'ok');
+      loadUsers(true); custFetch(String(id));
+    }
+  });
+}
+function custMsg(id){
+  var t = document.getElementById('cMsg');
+  var txt = t ? (t.value||'') : '';
+  if(!txt.trim()){ toast((LANG==='cn'?'请输入内容':'Type a message'),'err'); return; }
+  callApi('msg', {id:String(id), text:txt}).then(function(d){
+    if(d && d.ok){
+      toast((LANG==='cn'?'已发送':'Sent'),'ok');
+      var e = document.getElementById('cMsg'); if(e) e.value = '';
+      custFetch(String(id));
+    }
+  });
+}
+function copyId(id){
+  try{
+    if(navigator.clipboard){ navigator.clipboard.writeText(String(id)); toast((LANG==='cn'?'已复制':'Copied'),'ok'); return; }
+  }catch(e){}
+  alert(String(id));
+}
+
+function admCustomers(){
+  if(S.uOpen) return custFileView(S.uOpen);
+  var h = apiBar();
+  if(!hasApi()){
+    return h + '<div class="empty"><span class="e">🔌</span>' + (LANG==='cn'
+      ? '连接机器人后才能看到全部用户。一部手机只能看到自己的账号。'
+      : 'Connect to the bot to see every customer. A phone can only ever see its own accounts.') +
+      '<div style="margin-top:14px"><button class="btn primary" onclick="apiSheet()">🔌 ' + (LANG==='cn'?'填写接口':'Set up connection') + '</button></div></div>';
+  }
+  if(S.loadingUsers || !S.liveUsers){
+    loadUsers();
+    return h + '<div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px;margin-bottom:9px"></div><div class="sk" style="height:64px"></div>';
+  }
+
+  var all = S.liveUsers || [];
+  var today = new Date().toISOString().slice(0,10);
+  var on = 0, fresh = 0, hold = 0, sold = 0, buyers = 0;
+  for(var i=0;i<all.length;i++){
+    var u = all[i];
+    if(u.online) on++;
+    if(String(u.joined||'') === today) fresh++;
+    hold += Number(u.balance)||0;
+    sold += Number(u.spent)||0;
+    if((Number(u.orders_n)||0) > 0) buyers++;
+  }
+
+  h += '<div class="grid2" style="margin-bottom:9px">';
+  h += '<div class="stat"><b>' + all.length + '</b><span>' + (LANG==='cn'?'全部用户':'All users') + '</span></div>';
+  h += '<div class="stat"><b style="color:#5eead4">' + on + '</b><span>' + (LANG==='cn'?'在线':'Online') + '</span></div>';
+  h += '</div>';
+  h += '<div class="grid2" style="margin-bottom:9px">';
+  h += '<div class="stat"><b style="color:#fbbf24">' + fresh + '</b><span>' + (LANG==='cn'?'今日新增':'New today') + '</span></div>';
+  h += '<div class="stat"><b>' + buyers + '</b><span>' + (LANG==='cn'?'已购买':'Buyers') + '</span></div>';
+  h += '</div>';
+  h += '<div class="card" style="margin-bottom:12px;padding:12px">';
+  h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'钱包总额':'Balances held') + '</span><span class="val">' + money2(hold) + '</span></div>';
+  h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'累计销售':'Total sold') + '</span><span class="val">' + money2(sold) + '</span></div>';
+  h += '</div>';
+
+  var chips = [['all','👥 ' + (LANG==='cn'?'全部':'All')],['online','🟢 ' + (LANG==='cn'?'在线':'Online')],
+               ['new','🆕 ' + (LANG==='cn'?'今日新增':'New today')],['buyers','🛒 ' + (LANG==='cn'?'有订单':'Has orders')],
+               ['money','💰 ' + (LANG==='cn'?'有余额':'Has balance')]];
+  h += '<div class="chips">';
+  for(var c=0;c<chips.length;c++){
+    h += '<div class="chip' + (S.uFilter===chips[c][0]?' on':'') + '" onclick="custFilter(\'' + chips[c][0] + '\')">' + chips[c][1] + '</div>';
+  }
+  h += '</div>';
+
+  h += '<input class="inp" placeholder="' + (LANG==='cn'?'搜索姓名 / 用户名 / 邮箱 / ID':'Search name, username, email or id') + '" oninput="S.uq=this.value;render()" value="' + esc(S.uq||'') + '" style="margin-bottom:12px">';
+
+  var q = (S.uq||'').toLowerCase();
+  var list = all.filter(function(u){
+    if(S.uFilter === 'online' && !u.online) return false;
+    if(S.uFilter === 'new' && String(u.joined||'') !== today) return false;
+    if(S.uFilter === 'buyers' && !((Number(u.orders_n)||0) > 0)) return false;
+    if(S.uFilter === 'money' && !(Number(u.balance)||0 > 0)) return false;
+    if(!q) return true;
+    return (u.name||'').toLowerCase().indexOf(q)>=0 || (u.email||'').toLowerCase().indexOf(q)>=0 ||
+           (u.username||'').toLowerCase().indexOf(q)>=0 || String(u.id).indexOf(q)>=0 ||
+           (u.phone||'').toLowerCase().indexOf(q)>=0;
+  });
+
+  if(S.uFilter === 'new'){
+    list = list.slice().sort(function(a,b){ return String(b.joined||'').localeCompare(String(a.joined||'')); });
+  }
+
+  if(!list.length){
+    return h + '<div class="empty"><span class="e">👤</span>' + (LANG==='cn'?'没有符合条件的用户':'Nobody matches this filter') + '</div>';
+  }
+
+  h += '<div class="mini" style="margin-bottom:8px">' + list.length + ' ' + (LANG==='cn'?'位用户':'shown') + '</div>';
+
+  h += list.map(function(u){
+    var dot = u.online ? '<span style="color:#5eead4">●</span>' : '<span style="color:var(--dim2)">○</span>';
+    var role = u.role === 'owner' ? '👑' : (u.role === 'admin' || u.role === 'subadmin') ? '🛠' : '';
+    var isNew = String(u.joined||'') === today;
+    var r = '<div class="card" style="margin-bottom:9px;padding:11px;cursor:pointer" onclick="custOpen(\'' + u.id + '\')">';
+    r += '<div style="display:flex;gap:10px;align-items:center">';
+    r += '<div class="av" style="width:40px;height:40px;font-size:15px;border-radius:13px;flex:none">' + esc((u.name||u.id).slice(0,1).toUpperCase()) + '</div>';
+    r += '<div style="min-width:0;flex:1">';
+    r += '<b style="font-size:12.5px">' + dot + ' ' + role + ' ' + esc(u.name||u.username||u.id) + '</b>';
+    if(isNew) r += ' <span class="tag ok" style="font-size:9px">NEW</span>';
+    r += '<div class="mini">' + (u.username ? '@' + esc(u.username) + ' · ' : '') + '<code>' + esc(u.id) + '</code></div>';
+    if(u.email) r += '<div class="mini">✉️ ' + esc(u.email) + '</div>';
+    r += '<div class="mini">' + (u.orders_n||0) + ' ' + (LANG==='cn'?'单':'orders') + ' · ' + (LANG==='cn'?'消费':'spent') + ' ' + money2(u.spent) + ' · ' + (u.online ? (LANG==='cn'?'在线':'online') : ago(u.last_seen)) + '</div>';
+    r += '</div>';
+    r += '<div class="price"><b>' + money2(u.balance) + '</b><span class="mini">' + (LANG==='cn'?'余额':'balance') + '</span></div>';
+    r += '</div></div>';
+    return r;
+  }).join('');
+
+  return h;
+}
+
+function custFileView(id){
+  var u = S.uDetail && String(S.uDetail.id) === String(id) ? S.uDetail : null;
+  var h = '<div class="back" onclick="custBack()">← ' + (LANG==='cn'?'全部用户':'All customers') + '</div>';
+
+  if(!u){
+    if(!S.uLoading && S.uTried !== String(id)){
+      custFetch(String(id));
+    }
+    if(S.uErr && !S.uLoading){
+      h += '<div class="empty"><span class="e">⚠️</span>' + esc(S.uErr) +
+           '<div style="margin-top:12px"><button class="btn primary" onclick="S.uTried=null;S.uErr=null;custFetch(\'' + id + '\')">🔄 ' + (LANG==='cn'?'重试':'Retry') + '</button></div></div>';
+      return h;
+    }
+    return h + '<div class="sk" style="height:120px"></div>';
+  }
+
+  h += '<div class="card glowline" style="margin-bottom:12px">';
+  h += '<div style="display:flex;gap:12px;align-items:center">';
+  h += '<div class="av" style="width:48px;height:48px;font-size:19px;border-radius:15px">' + esc((u.name||u.id).slice(0,1).toUpperCase()) + '</div>';
+  h += '<div style="min-width:0;flex:1"><b style="font-size:15px">' + esc(u.name||u.username||u.id) + '</b>';
+  h += '<div class="mini">' + (u.username ? '@'+esc(u.username) : (LANG==='cn'?'无用户名':'no username')) + '</div>';
+  h += '<div class="mini">' + (u.online ? '🟢 ' + (LANG==='cn'?'在线':'online now') : '⚪ ' + (LANG==='cn'?'离线':'offline') + ' · ' + ago(u.last_seen)) + '</div></div>';
+  h += '<div class="price"><b style="font-size:17px">' + money2(u.balance) + '</b><span class="mini">' + (LANG==='cn'?'余额':'balance') + '</span></div>';
+  h += '</div>';
+  h += '<div class="split" style="margin-top:10px"><button class="btn ghost sm" onclick="copyId(\''+u.id+'\')">📋 ' + (LANG==='cn'?'复制 ID':'Copy ID') + '</button>';
+  h += '<button class="btn ghost sm" onclick="custFetch(\''+u.id+'\')">🔄 ' + (LANG==='cn'?'刷新':'Refresh') + '</button></div>';
+  h += '</div>';
+
+  var tabs = [['info','👤 ' + (LANG==='cn'?'资料':'Profile')],['orders','🛒 ' + (LANG==='cn'?'订单':'Orders')],
+              ['money','💰 ' + (LANG==='cn'?'资金':'Money')],['acts','📜 ' + (LANG==='cn'?'记录':'Activity')]];
+  h += '<div class="tabs">';
+  for(var i=0;i<tabs.length;i++){
+    h += '<div class="tab' + (S.uTab===tabs[i][0]?' on':'') + '" onclick="custTab(\''+tabs[i][0]+'\')">' + tabs[i][1] + '</div>';
+  }
+  h += '</div>';
+
+  if(S.uTab === 'info'){
+    h += '<div class="card" style="padding:12px;margin-bottom:12px">';
+    var rows = [
+      ['ID', String(u.id)],
+      ['Telegram', u.username ? '@'+u.username : '—'],
+      [(LANG==='cn'?'昵称':'Telegram name'), u.tg_name || '—'],
+      ['Email', u.email || '—'],
+      [(LANG==='cn'?'电话':'Phone'), u.phone || '—'],
+      [(LANG==='cn'?'语言':'Language'), u.lang || 'en'],
+      [(LANG==='cn'?'角色':'Role'), u.role || 'member'],
+      [(LANG==='cn'?'注册日期':'Joined'), u.joined || '—'],
+      [(LANG==='cn'?'最后出现':'Last seen'), when(u.last_seen)],
+      [(LANG==='cn'?'推荐人':'Referred by'), u.ref_by || '—'],
+      [(LANG==='cn'?'提现地址':'Wallet'), u.wallet || '—'],
+      [(LANG==='cn'?'订单数':'Orders'), String(u.orders_n||0)],
+      [(LANG==='cn'?'累计消费':'Total spent'), money2(u.spent)],
+      [(LANG==='cn'?'返佣收益':'Referral earnings'), money2(u.earnings)],
+      [(LANG==='cn'?'推荐人数':'Referrals'), String(u.refs||0)]
+    ];
+    for(var r2=0;r2<rows.length;r2++){
+      h += '<div class="row"><span class="lbl">' + rows[r2][0] + '</span><span class="val" style="max-width:60%;text-align:right;word-break:break-all">' + esc(rows[r2][1]) + '</span></div>';
+    }
+    h += '</div>';
+  }
+
+  if(S.uTab === 'orders'){
+    var os = u.orders || [];
+    h += '<div class="card" style="padding:12px;margin-bottom:12px"><div class="row"><span class="lbl">' + (LANG==='cn'?'订单总数':'Orders') + '</span><span class="val">' + os.length + '</span></div>';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'消费总额':'Total spent') + '</span><span class="val">' + money2(u.spent) + '</span></div></div>';
+    if(!os.length){
+      h += '<div class="empty"><span class="e">🛒</span>' + (LANG==='cn'?'还没有订单':'No orders yet') + '</div>';
+    } else {
+      h += os.slice().reverse().map(function(o){
+        var st = o.status || 'pending';
+        var cls = st === 'completed' ? 'ok' : st === 'cancelled' ? 'out' : 'low';
+        return '<div class="card" style="margin-bottom:9px;padding:11px"><div style="display:flex;justify-content:space-between;gap:8px">' +
+          '<div style="min-width:0"><b style="font-size:12.5px">' + esc(o.item_name||'item') + '</b>' +
+          '<div class="mini">' + esc(o.id||'') + ' · ×' + esc(o.qty||1) + ' · ' + esc(o.date||'') + '</div></div>' +
+          '<div style="text-align:right;flex:none"><b style="font-size:12.5px">' + money2(o.total) + '</b>' +
+          '<div><span class="tag ' + cls + '">' + esc(st) + '</span></div></div></div></div>';
+      }).join('');
+    }
+  }
+
+  if(S.uTab === 'money'){
+    h += '<div class="card" style="padding:12px;margin-bottom:12px">';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'当前余额':'Current balance') + '</span><span class="val" style="font-size:16px">' + money2(u.balance) + '</span></div>';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'累计充值':'Deposited') + '</span><span class="val">' + money2(u.deposit_total) + '</span></div>';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'累计消费':'Spent') + '</span><span class="val">' + money2(u.spent) + '</span></div>';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'已提现':'Withdrawn') + '</span><span class="val">' + money2(u.wd_paid) + '</span></div>';
+    h += '<div class="row"><span class="lbl">' + (LANG==='cn'?'待处理提现':'Pending withdrawals') + '</span><span class="val">' + money2(u.wd_pending) + '</span></div>';
+    h += '</div>';
+
+    if(can('wallet')){
+      h += '<div class="card" style="padding:12px;margin-bottom:12px"><h3>💳 ' + (LANG==='cn'?'调整余额':'Adjust balance') + '</h3>';
+      h += '<label class="fl">' + (LANG==='cn'?'金额 USD':'Amount USD') + '</label>';
+      h += '<input class="inp" id="cAmt" type="number" inputmode="decimal" placeholder="25" style="margin-bottom:8px">';
+      h += '<label class="fl">' + (LANG==='cn'?'原因（用户可见）':'Reason (the user sees this)') + '</label>';
+      h += '<input class="inp" id="cReason" placeholder="' + (LANG==='cn'?'例如：充值 / 补偿':'e.g. deposit / refund / bonus') + '" style="margin-bottom:9px">';
+      h += '<div class="split"><button class="btn green" onclick="custAct(\''+u.id+'\',\'credit\')">➕ ' + (LANG==='cn'?'加余额':'Add') + '</button>';
+      h += '<button class="btn ghost" onclick="custAct(\''+u.id+'\',\'debit\')">➖ ' + (LANG==='cn'?'扣余额':'Deduct') + '</button></div>';
+      h += '</div>';
+    }
+
+    var ds = u.deposits || [];
+    h += '<h3 style="margin-top:14px">💰 ' + (LANG==='cn'?'充值记录':'Deposits') + '</h3>';
+    if(!ds.length){ h += '<div class="mini" style="margin-bottom:10px">' + (LANG==='cn'?'没有充值记录':'No deposits') + '</div>'; }
+    else {
+      h += ds.slice(-10).reverse().map(function(d){
+        return '<div class="card" style="margin-bottom:8px;padding:10px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">' + money2(d.amount) + '</b><span class="mini">' + esc(d.status||'pending') + '</span></div><div class="mini">' + esc(d.date||'') + ' · ' + esc(String(d.ref||d.note||'').slice(0,40)) + '</div></div>';
+      }).join('');
+    }
+
+    var ws = u.withdrawals || [];
+    h += '<h3 style="margin-top:14px">🏦 ' + (LANG==='cn'?'提现记录':'Withdrawals') + '</h3>';
+    if(!ws.length){ h += '<div class="mini" style="margin-bottom:10px">' + (LANG==='cn'?'没有提现记录':'No withdrawals') + '</div>'; }
+    else {
+      h += ws.slice(-10).reverse().map(function(w){
+        return '<div class="card" style="margin-bottom:8px;padding:10px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">' + money2(w.amount) + '</b><span class="mini">' + esc(w.status||'pending') + '</span></div><div class="mini">' + esc(w.date||'') + ' · ' + esc(String(w.wallet||'').slice(0,30)) + '</div></div>';
+      }).join('');
+    }
+  }
+
+  if(S.uTab === 'acts'){
+    var acts = u.activity || [];
+    if(!acts.length){
+      h += '<div class="empty"><span class="e">📜</span>' + (LANG==='cn'?'还没有记录':'Nothing recorded yet') + '</div>';
+    } else {
+      h += acts.slice().reverse().map(function(a){
+        var icon = a.k === 'order' ? '🛒' : a.k === 'credit' ? '➕' : a.k === 'debit' ? '➖' : a.k === 'msg' ? '💬' : '•';
+        return '<div class="card" style="margin-bottom:8px;padding:10px"><div style="display:flex;justify-content:space-between;gap:8px">' +
+          '<div style="min-width:0"><b style="font-size:12px">' + icon + ' ' + esc(a.d||'') + '</b>' +
+          '<div class="mini">' + when(a.t) + '</div></div>' +
+          (Number(a.amt) ? '<b style="font-size:12px;flex:none">' + money2(a.amt) + '</b>' : '') +
+          '</div></div>';
+      }).join('');
+    }
+  }
+
+  if(can('message')){
+    h += '<h3 style="margin-top:16px">💬 ' + (LANG==='cn'?'发送私信':'Send a personal message') + '</h3>';
+    h += '<textarea class="inp" id="cMsg" rows="3" style="resize:vertical" placeholder="' + (LANG==='cn'?'这条消息只会发给此人':'Only this person receives it') + '"></textarea>';
+    h += '<button class="btn vio wide" onclick="custMsg(\''+u.id+'\')">📤 ' + (LANG==='cn'?'发送':'Send') + '</button>';
+  }
+
+  return h;
+}
+
 function bcastSheet(){
   if(!can('broadcast')){ toast((LANG==='cn'?'没有群发权限':'No broadcast right'),'err'); return; }
   sheet('<h3>📣 ' + (LANG==='cn'?'群发给所有用户':'Broadcast to all users') + '</h3>' +
