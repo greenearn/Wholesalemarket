@@ -249,8 +249,8 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq611tbMZfLG2jcvJ9AwR7ady-q4985GplB3o-Z3NYRr3muJxTS-FHNCE9Wm3Ezj5Ss5WdY3Jus-y7U7RVb8RNHr1l4S-Bahwd8bwgWk6CecuTFBAc4ZwZG3W2oOZVySeHWLO2pB9m62FkuSJuxesYWXBBtd0e_KY3cCO8Eh_orN6egxIFHKIX4QxPkiz61nNIb0Nz",    
-VER: "1793809773",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq622UK6eGb8Ee55psLInhMGNYPLldWpMoRguZtl1BgKpgtRMlrfTkoFjCOtgOG22N5xXAOuduqxcsPTAdrrRW1lP81TB5y6qlza29lqM1T3lK3v9NWS19LjiMasfL7U2XcaJOnS5ugWUNWfKQnt9BEJpY1UuGnCUjh6yxcv6SdQJew2yu52OAERw7qCgGZ_ifMYo_",    
+VER: "1793813908",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -780,7 +780,7 @@ return '<section><div class="empty"><span class="e">🔒</span>' + (LANG==='cn'?
 }
 let h = '<section><div class="back" onclick="go(\'profile\')">← ' + t('back') + '</div>';
 h += '<p class="kicker">' + t('admin') + '</p><h1 style="font-size:22px">' + t('admin') + '</h1>';
-h += '<div class="mini" style="margin:-4px 0 10px">build R2 · users tab fixed · tap a name to open their file</div>';
+h += '<div class="mini" style="margin:-4px 0 10px">build ' + (CFG.VER||'?') + ' · tap a name to open their file</div>';
 h += '<div class="tabs">';
 const tabs = [['users','👥 ' + (LANG==='cn'?'用户':'Users')],['money','💰 ' + (LANG==='cn'?'资金':'Money')],['products','🧩 ' + t('items')],['cats','🗂 ' + t('statCats')],['orders','🛒 ' + t('orders')],['team','🎖 ' + (LANG==='cn'?'权限':'Team')]];
 tabs.forEach(x => { h += '<div class="tab' + (ADM.tab===x[0]?' on':'') + '" onclick="ADM.tab=\'' + x[0] + '\';ADM.edit=null;render()">' + x[1] + '</div>'; });

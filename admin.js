@@ -347,6 +347,39 @@ function gate(){
   b.onclick = open;
   document.body.appendChild(b);
 }
+/* ---- balance hand-off from the payment callback ----
+   A mini app cannot fetch the bot's balance from a phone: the browser blocks the
+   cross-origin call, which is the same reason the catalogue never arrived. So the
+   bot puts the new balance in the button link (?bal=12.34) and this writes it into
+   the shop's own storage before the page draws. The parameter is then removed, so
+   reopening the app does not re-apply an old figure. */
+function syncBal(){
+  var m = /[?&]bal=([0-9]+(?:\.[0-9]+)?)/.exec(String(location.search||""));
+  if(!m){ return; }
+  var v = Math.round(Number(m[1])*100)/100;
+  if(!isFinite(v)){ return; }
+  try{
+    localStorage.setItem("wm_balance", JSON.stringify(v));
+    var u = null;
+    try{ u = JSON.parse(localStorage.getItem("wm_user")||"null"); }catch(e){ u = null; }
+    if(u && u.email){
+      var all = null;
+      try{ all = JSON.parse(localStorage.getItem("wm_accounts")||"null"); }catch(e){ all = null; }
+      if(all && all[u.email]){
+        all[u.email].balance = v;
+        localStorage.setItem("wm_accounts", JSON.stringify(all));
+      }
+    }
+  }catch(e){}
+  /* Drop the parameter and redraw once. Without this the app would keep showing
+     the old number until it was reopened. */
+  try{
+    history.replaceState(null, "", location.pathname + location.hash);
+    location.reload();
+  }catch(e){}
+}
+syncBal();
+
 if(document.readyState === "loading"){ document.addEventListener("DOMContentLoaded", gate); }
 else { gate(); }
 })();
