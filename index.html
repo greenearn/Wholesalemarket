@@ -250,8 +250,8 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6yhhbrvmTQ1B3VjzsWz6xf2IXmJHl8ruZxpVTrHceKpWmdzt8EEC3_RxVRzkd1q06ZZsB7T_qj2gRhKu8BdOEbKYPwwDyPNiZawlTTBHOhhPKx8e_mXTqikbE30Ky8j4itAXdaOHgPilGaqqsA6HQKs9J38G8v_M_vmdt2MN5VhMDsNyc0vJ8T5Ro5YCDVdryXpT",    
-VER: "1793796193",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6zCWt8ltt2B7_GtTe5ubjiuHEuyM2Y1x6KkAD76CrlgKP6bVAqobJ-z8stti1tqpU3fawdykHshryp9cSCBf88j9zCcaXWsXkwiP4U7MfFlp-8ZYAHitULUAAM991lDYOoNaPH9Au8ugDUqwsoDLm_tVdPUdzotIBSdhV7Gyhq_cNo68Id-hO24OHOrbxHwZp2U5",    
+VER: "1793798294",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -674,9 +674,6 @@ sheet('<h3>🧾 ' + (LANG==='cn'?'手动充值':'Manual deposit') + '</h3>' +
 '<label class="fl">' + (LANG==='cn'?'备注或交易号':'Note or transaction hash') + '</label>' +
 '<input class="inp" id="mdNote" placeholder="' + (LANG==='cn'?'可留空':'optional') + '">' +
 '<label class="fl">' + (LANG==='cn'?'付款截图':'Payment screenshot') + '</label>' +
-— the file picker and the function after it — which is what made the
-shipped page die with "Invalid or unexpected token". The HTML produced at
-runtime is identical. Never write that pair inside a string in this file. */
 '<input class="inp" id="mdShot" type="file" accept="image/' + '*' + '" onchange="shotPicked(this)">' +
 '<div id="mdPrev"></div>' +
 '<button class="btn primary wide" style="margin-top:10px" onclick="manualSend()">📤 ' + (LANG==='cn'?'提交核对':'Submit for review') + '</button>');
@@ -1523,7 +1520,7 @@ h += '<div class="row"><span class="lbl">' + t('theme') + '</span><button class=
 h += '</div>';
 h += '<button class="btn ghost wide" style="margin-bottom:8px" onclick="contactSupport()">💬 ' + t('chatSupport') + '</button>';
 h += '<button class="btn ghost wide" onclick="logout()">🚪 ' + t('logout') + '</button>';
-h += '<div class="center mini" style="margin:16px 0">Wholesale Market Worldwide · v2 · ' + (S.online ? t('online') : t('offline')) + '</div>';
+h += '<div class="center mini" style="margin:16px 0">Wholesale Market Worldwide · v2 · build ' + (CFG.VER || '?') + ' · ' + (S.catalogLive ? t('online') : t('offline')) + '</div>';
 h += '</section><div style="height:20px"></div>';
 return h;
 }
