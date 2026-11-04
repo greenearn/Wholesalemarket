@@ -249,8 +249,8 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq622UK6eGb8Ee55psLInhMGNYPLldWpMoRguZtl1BgKpgtRMlrfTkoFjCOtgOG22N5xXAOuduqxcsPTAdrrRW1lP81TB5y6qlza29lqM1T3lK3v9NWS19LjiMasfL7U2XcaJOnS5ugWUNWfKQnt9BEJpY1UuGnCUjh6yxcv6SdQJew2yu52OAERw7qCgGZ_ifMYo_",    
-VER: "1793813908",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq64CkOhy6kTOtITb1ZjihmhgEVjaQZdSh0dk2bWGUIg4TtHYTXdrZGx3Mg6aiI8YjWICp6U7XPv3tBGlAj6MkXufYZOaBs3VwYhwDRLVY4qE-ZEYi5Fac6m6fb9rHP7s84U24fzAINo8DIGXaEdmQUQbhzXc_m18qBrKDGs6MY7RK8clNV1zjznrPb00hb5FFGQ1u",    
+VER: "1793818788",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -605,7 +605,7 @@ h += '<div class="stat"><b>' + money(S.earnings) + '</b><span>' + t('earnings') 
 h += '<div class="stat"><b>' + S.refs + '</b><span>' + t('refs') + '</span></div>';
 h += '</div>';
 h += '<div class="card" style="margin-bottom:14px"><h3>' + t('deposit') + '</h3><p style="margin-bottom:8px">' + t('depositSub') + '</p>';
-h += '<button class="btn vio wide sm" onclick="autoDeposit()">⚡ ' + (LANG==='cn'?'自动加密货币充值':'Automatic crypto deposit') + '</button></div>';
+h += '<button class="btn primary wide sm" onclick="manualDeposit()">🧾 ' + (LANG==='cn'?'手动充值':'Manual deposit') + '</button></div>';
 h += '<div class="sec"><h2>' + t('txs') + '</h2></div>';
 if(!S.txs.length){
 h += '<div class="empty" style="padding:22px"><span class="e">🧾</span>' + t('noTx') + '</div>';
@@ -629,27 +629,11 @@ sheet('<h3>' + t('depositTitle') + '</h3><p>' + t('depositSub') + '</p>' +
 '<input class="inp" id="depAmt" type="number" inputmode="decimal" placeholder="50" value="50">' +
 '<label class="fl">' + t('method') + '</label>' +
 '<div class="chips" style="padding-bottom:12px"><div class="chip on" id="mUSDT" onclick="pickMethod(this)">USDT TRC20</div><div class="chip" onclick="pickMethod(this)">USDT BEP20</div><div class="chip" onclick="pickMethod(this)">BTC</div><div class="chip" onclick="pickMethod(this)">ETH</div></div>' +
-'<button class="btn primary wide" style="margin-bottom:9px" onclick="autoDeposit()">⚡ ' + (LANG==='cn'?'前往支付平台':'Continue to payment') + '</button>' +
-'<button class="btn ghost wide" onclick="manualDeposit()">🧾 ' + t('depositManual') + '</button>' +
+'<button class="btn primary wide" style="margin-bottom:9px" onclick="manualDeposit()">🧾 ' + t('depositManual') + '</button>' +
 '<p class="mini" style="margin-top:10px">' + t('depositManualTxt') + '</p>');
 }
 let DEP_METHOD = 'USDT TRC20';
 function pickMethod(el){ document.querySelectorAll('#modal .chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); DEP_METHOD = el.textContent.trim(); }
-function autoDeposit(){
-const amt = doMoney((document.getElementById('depAmt')||{}).value || 0);
-if(amt <= 0){ toast(t('required'),'err'); return; }
-const openIt = () => {
-sendToBot({action:'deposit', amount:amt, method:DEP_METHOD});
-try { Telegram.WebApp.openLink(CFG.PAY_SITE, {try_instant_view:false}); } catch(e){ window.open(CFG.PAY_SITE,'_blank'); }
-toast(LANG==='cn'?'支付完成后余额会自动更新':'Balance updates automatically after payment','ok');
-};
-if(S.online && CFG.API){
-fetch(CFG.API + '/deposit', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user:userId(), amount:amt, method:DEP_METHOD})})
-.then(r => r.json()).then(d => { if(d && d.pay_url){ try{ Telegram.WebApp.openLink(d.pay_url); }catch(e){ window.open(d.pay_url,'_blank'); } } else openIt(); })
-.catch(openIt);
-} else openIt();
-closeSheet();
-}
 let SHOT_DATA = '';
 function manualDeposit(){
 const amt = doMoney((document.getElementById('depAmt')||{}).value || 0);
@@ -661,7 +645,7 @@ sheet('<h3>🧾 ' + (LANG==='cn'?'手动充值':'Manual deposit') + '</h3>' +
 '<label class="fl">' + t('depositAmount') + ' (USD)</label>' +
 '<input class="inp" id="mdAmt" type="number" inputmode="decimal" placeholder="50" value="' + (amt>0?amt:50) + '">' +
 '<label class="fl">' + t('method') + '</label>' +
-'<input class="inp" id="mdMethod" placeholder="USDT TRC20 / BTC / bank transfer">' +
+'<input class="inp" id="mdMethod" placeholder="USDT TRC20 / BTC / bank transfer">' + (S.payHtml||'') +
 '<label class="fl">' + (LANG==='cn'?'备注或交易号':'Note or transaction hash') + '</label>' +
 '<input class="inp" id="mdNote" placeholder="' + (LANG==='cn'?'可留空':'optional') + '">' +
 '<label class="fl">' + (LANG==='cn'?'付款截图':'Payment screenshot') + '</label>' +
@@ -948,6 +932,7 @@ function applyCatalog(d){
 if(!d || !Array.isArray(d.items) || !d.items.length) return false;
 if(Array.isArray(d.cats) && d.cats.length){ S.cats = d.cats; }
 if(d.members) S.members = {total:Number(d.members)||0, online:Number(d.online)||0, fresh:Number(d.fresh)||0};
+S.payHtml = String(d.pay_html||'');
 S.items = d.items;
 S.catalogLive = true; S.catalogErr = null;
 persist(); render();

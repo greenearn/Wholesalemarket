@@ -164,9 +164,13 @@ function draw(){
   var pend = 0, wp = 0, i;
   for(i=0;i<D.deposits.length;i++){ if(D.deposits[i].status === "pending"){ pend++; } }
   for(i=0;i<D.withdrawals.length;i++){ if(D.withdrawals[i].status === "pending"){ wp++; } }
+  var nusers = 0;
+  for(i in D.users){ if(D.users.hasOwnProperty(i)){ nusers++; } }
   h += '<div class="tabs">' + tabBtn("dep","Deposits " + pend) + tabBtn("wd","Withdrawals " + wp) +
-       tabBtn("acc","Accounts " + D.accounts.length) + tabBtn("team","Team " + D.admins.length) + tabBtn("set","Storage") + '</div>';
-  if(TAB === "dep"){ h += depHtml(); }
+       tabBtn("users","Users " + nusers) + tabBtn("acc","Accounts " + D.accounts.length) +
+       tabBtn("team","Team " + D.admins.length) + tabBtn("set","Storage") + '</div>';
+  if(TAB === "users"){ h += usersHtml(); }
+  else if(TAB === "dep"){ h += depHtml(); }
   else if(TAB === "wd"){ h += wdHtml(); }
   else if(TAB === "acc"){ h += accHtml(); }
   else if(TAB === "team"){ h += teamHtml(); }
@@ -175,6 +179,50 @@ function draw(){
 }
 function tabBtn(k,label){
   return '<div class="tab' + (TAB === k ? " on" : "") + '" onclick="WMA.tab(\'' + k + '\')">' + esc(label) + '</div>';
+}
+
+/* The ledger's customers. Every balance in the shop lives in this file now, so
+   this tab is where it is read and corrected. */
+function usersHtml(){
+  var h = '<div class="card"><b>Find a customer</b>' +
+    '<input id="uq" placeholder="Name, username or Telegram id">' +
+    '<button class="b" onclick="WMA.uFind()">Search</button>' +
+    '<div class="m">Balances are stored in this file. A customer who never opened the app still appears once they are listed here.</div></div>';
+  var keys = [], k;
+  for(k in D.users){ if(D.users.hasOwnProperty(k)){ keys.push(k); } }
+  keys.sort();
+  var i, u, shown = 0, total = 0;
+  for(i=0;i<keys.length;i++){
+    u = D.users[keys[i]] || {};
+    total += Number(u.bal||0);
+  }
+  h += '<div class="card"><b>' + keys.length + ' customers</b><div class="m">Total balance held: ' + money(total) + '</div></div>';
+  var q = String(UF || "").toLowerCase();
+  for(i=0;i<keys.length && shown < 40;i++){
+    u = D.users[keys[i]] || {};
+    var hay = (keys[i] + " " + (u.name||"") + " " + (u.username||"")).toLowerCase();
+    if(q && hay.indexOf(q) < 0){ continue; }
+    shown++;
+    h += '<div class="card"><b>' + esc(u.name || "(no name)") + '</b>' +
+      '<div class="m">' + esc(u.username ? "@" + u.username : "") + ' · id ' + esc(keys[i]) + '</div>' +
+      '<div class="m">Balance <b>' + money(u.bal) + '</b>' + (u.role && u.role !== "member" ? ' · ' + esc(u.role) : "") + '</div>' +
+      '<input id="ba_' + i + '" placeholder="New balance, e.g. 25.50" inputmode="decimal">' +
+      '<button class="b" onclick="WMA.setBal(' + "\u0027" + keys[i] + "\u0027" + ',' + "\u0027" + 'ba_' + i + "\u0027" + ')">Set balance</button>' +
+      '</div>';
+  }
+  if(!shown){ h += '<div class="card"><div class="m">No customer matched.</div></div>'; }
+  return h;
+}
+var UF = "";
+function uFind(){ var e = document.getElementById("uq"); UF = e ? String(e.value||"") : ""; draw(); }
+function setBal2(id, inputId){
+  var raw = val(inputId);
+  var v = Number(String(raw).replace(/[^0-9.\-]/g, ""));
+  if(!isFinite(v)){ MSG = "That is not a number."; MSGERR = true; draw(); return; }
+  if(!D.users[id]){ D.users[id] = {}; }
+  D.users[id].bal = Math.round(v*100)/100;
+  MSG = "Balance updated."; MSGERR = false;
+  act(save);
 }
 
 function depHtml(){
@@ -329,7 +377,10 @@ function test(){
 window.WMA = {open:open, close:close, tab:function(k){ TAB = k; draw(); },
   depOk:depOk, depNo:depNo, wdOk:wdOk, wdNo:wdNo,
   accAdd:accAdd, accToggle:accToggle, accDel:accDel,
-  teamAdd:teamAdd, teamDel:teamDel, setupSave:setupSave, test:test};
+  teamAdd:teamAdd, teamDel:teamDel, setupSave:setupSave, test:test,
+  /* The buttons in the Users tab call these; without them here the tap throws
+     and the balance can never be corrected. */
+  uFind:uFind, setBal:setBal2};
 
 /* The gear appears only in admin mode, so a customer never sees it. The bot's
    /admin button already opens the app with admin=1. */
@@ -379,6 +430,72 @@ function syncBal(){
   }catch(e){}
 }
 syncBal();
+
+/* ---- the ledger, read by the customer ----
+   data.json is the shop's real ledger now (option 1: the GitHub file is the
+   source of truth). A customer's phone cannot ask the bot for a balance — that
+   call is cross-origin and the browser blocks it — but a public repo's raw file
+   can be read by anyone with no token. So the balance is read straight from the
+   shop's own GitHub file and written where index.html looks for it.
+
+   The sessionStorage flag stops this repeating: it reads once per session, and
+   only reloads the page if the figure actually changed. Without that guard a
+   stale ledger would reload the page forever. */
+function ledgerRead(){
+  var c = cfg();
+  if(!c.o || !c.r){ return; }
+  var tg = "";
+  try{
+    var tu = Telegram.WebApp.initDataUnsafe.user;
+    tg = (tu && tu.id) ? String(tu.id) : "";
+  }catch(e){ tg = ""; }
+  if(!tg){ return; }
+
+  var seen = "";
+  try{ seen = sessionStorage.getItem("wm_ledger") || ""; }catch(e){ return; }
+  if(seen === tg){ return; }
+
+  var file = String(c.p || "data.json").replace(/^\/+/, "");
+  var branches = ["main", "master"];
+
+  function attempt(n){
+    if(n >= branches.length){ return; }
+    var url = "https://raw.githubusercontent.com/" + c.o + "/" + c.r + "/" + branches[n] + "/" + file + "?t=" + Date.now();
+    fetch(url, {cache:"no-store"}).then(function(r){
+      if(!r.ok){ attempt(n + 1); return null; }
+      return r.json();
+    }).then(function(d){
+      if(d === null || d === undefined){ return; }
+      if(!d || !d.users){ attempt(n + 1); return; }
+      var u = d.users[tg];
+      try{ sessionStorage.setItem("wm_ledger", tg); }catch(e){}
+      if(!u){ return; }
+      var v = Math.round(Number(u.bal || 0) * 100) / 100;
+      var changed = true;
+      try{
+        var old = JSON.parse(localStorage.getItem("wm_balance") || "null");
+        if(old !== null && Number(old) === v){ changed = false; }
+      }catch(e){ changed = true; }
+      try{
+        localStorage.setItem("wm_balance", JSON.stringify(v));
+        var acc = null;
+        try{ acc = JSON.parse(localStorage.getItem("wm_user") || "null"); }catch(e){ acc = null; }
+        if(acc && acc.email){
+          var all = null;
+          try{ all = JSON.parse(localStorage.getItem("wm_accounts") || "null"); }catch(e){ all = null; }
+          if(all && all[acc.email]){
+            all[acc.email].balance = v;
+            localStorage.setItem("wm_accounts", JSON.stringify(all));
+          }
+        }
+      }catch(e){}
+      /* Only redraw when the number moved, so a matching ledger never loops. */
+      if(changed){ try{ location.reload(); }catch(e){} }
+    }).catch(function(){ attempt(n + 1); });
+  }
+  attempt(0);
+}
+setTimeout(ledgerRead, 600);
 
 if(document.readyState === "loading"){ document.addEventListener("DOMContentLoaded", gate); }
 else { gate(); }
