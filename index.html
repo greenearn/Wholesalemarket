@@ -252,7 +252,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6wlDMii8BLjWmTvDwcL0ql2eeA3jQjzclCxS3tRbfcn3hNqaYHX0fGAC5yORqbSrz_NVvjLyybQEsHgmWKqH0t502KtYYaNBAmnlp9YkYBaZ_FOLz4lkAiXxE_uqr0ksmUhjBWdnOd043l1WkB5xKwEDBGc9wnohGpvGVr0mnVdCvBJrvuqvJhOvuzWQR6S7aJ2A",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6w7qZx-8QhcYSRoHgFB7PM-5wuiXhw9seghWCYDQGhaWUgaXrubCEHwbWN6rg7MwdQqrd7Y9ezq435hDRFEjVQpiiuCNoolx5IKYM4PuLyoS_7B52UvAaKeJifJrMyJR--GspRGhEPUnZ6XwnjxUOaLEY5DXD_irH344bU4u63_l9FaK1DHX_cXNUlN2Po39AALL",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -320,8 +320,45 @@ ls.set('refs', S.refs); ls.set('orders', S.orders); ls.set('txs', S.txs);
 ls.set('withdrawals', S.withdrawals); ls.set('markup', S.markup);
 ls.set('cats', S.cats); ls.set('items', S.items);
 }
-const SEED_CATS = [];
-const SEED_ITEMS = [];
+const SEED_CATS = [
+{id:'telegram',icon:'✈️',en:'Telegram Services',cn:'Telegram 服务',desc_en:'Premium, members, accounts, boosts — delivered instantly.',desc_cn:'会员、粉丝、账号、助力，即时交付。',subs:[{id:'tg-premium',en:'Telegram Premium',cn:'Telegram 会员'},{id:'tg-members',en:'Members & Followers',cn:'粉丝与成员'},{id:'tg-accounts',en:'Aged Accounts',cn:'账号出售'},{id:'tg-boost',en:'Boosts & Stars',cn:'助力与星星'}]},
+{id:'whatsapp',icon:'💬',en:'WhatsApp Services',cn:'WhatsApp 服务',desc_en:'Business accounts, green tick, bulk sender tools.',desc_cn:'商业账号、绿标认证、群发工具。',subs:[{id:'wa-accounts',en:'Business Accounts',cn:'商业账号'},{id:'wa-verify',en:'Verification & Green Tick',cn:'认证与绿标'},{id:'wa-tools',en:'Bulk Sender Tools',cn:'群发工具'}]},
+{id:'giftcards',icon:'🎁',en:'Gift Cards',cn:'礼品卡',desc_en:'Steam, iTunes, Google Play, Amazon, PSN and more.',desc_cn:'Steam、iTunes、Google Play、亚马逊、PSN 等。',subs:[{id:'gc-steam',en:'Steam',cn:'Steam 卡'},{id:'gc-itunes',en:'iTunes / Apple',cn:'iTunes / 苹果'},{id:'gc-google',en:'Google Play',cn:'Google Play'},{id:'gc-other',en:'Amazon & More',cn:'亚马逊及其他'}]},
+{id:'software',icon:'💻',en:'Software for Sale',cn:'软件出售',desc_en:'Licensed tools, licences and lifetime builds.',desc_cn:'正版工具、授权与永久版本。',subs:[{id:'sw-licence',en:'Licences',cn:'授权码'},{id:'sw-tools',en:'Automation Tools',cn:'自动化工具'},{id:'sw-design',en:'Design Assets',cn:'设计素材'}]},
+{id:'backends',icon:'🧩',en:'Platform Backend Designs',cn:'平台后台源码',desc_en:'Exchange, shop and bot backends with admin panels.',desc_cn:'交易所、商城、机器人后台源码，含管理面板。',subs:[{id:'be-exchange',en:'Exchange Backends',cn:'交易所后台'},{id:'be-shop',en:'Shop & Mini App',cn:'商城与小程序'},{id:'be-bot',en:'Bot Backends',cn:'机器人后台'}]},
+{id:'data',icon:'🗂',en:'Data Extraction',cn:'数据采集',desc_en:'Scraping, leads and clean datasets on request.',desc_cn:'爬取、线索与定制数据集。',subs:[{id:'data-leads',en:'Lead Lists',cn:'客户线索'},{id:'data-scrape',en:'Custom Scraping',cn:'定制爬取'}]},
+{id:'tiktok',icon:'🎵',en:'TikTok Services',cn:'TikTok 服务',desc_en:'Accounts, followers, live gifts and ads help.',desc_cn:'账号、粉丝、直播礼物与广告支持。',subs:[{id:'tt-accounts',en:'Accounts',cn:'账号'},{id:'tt-growth',en:'Followers & Likes',cn:'粉丝与点赞'}]},
+{id:'numbers',icon:'📱',en:'Second Number Register',cn:'二次号码注册',desc_en:'Verification numbers for any platform, per country.',desc_cn:'各平台各国家验证号码。',subs:[{id:'num-sms',en:'SMS Verification',cn:'短信验证'},{id:'num-rent',en:'Number Rental',cn:'号码租用'}]},
+{id:'ai',icon:'🤖',en:'AI Accounts & Products',cn:'AI 账号与产品',desc_en:'ChatGPT Plus, Claude, Midjourney, API credits.',desc_cn:'ChatGPT Plus、Claude、Midjourney、接口额度。',subs:[{id:'ai-chat',en:'ChatGPT & Claude',cn:'ChatGPT 与 Claude'},{id:'ai-image',en:'Image & Video AI',cn:'图像与视频 AI'},{id:'ai-api',en:'API Credits',cn:'接口额度'}]},
+{id:'facebook',icon:'📘',en:'Facebook Accounts',cn:'Facebook 账号',desc_en:'Profiles, pages and business managers with warranty.',desc_cn:'个人号、主页与广告账户，带质保。',subs:[{id:'fb-accounts',en:'Accounts & Pages',cn:'账号与主页'},{id:'fb-bm',en:'Business Managers',cn:'商务管理平台'}]},
+{id:'bank',icon:'🏦',en:'Bank Accounts',cn:'银行账户',desc_en:'Verified bank and payment accounts, KYC ready.',desc_cn:'已认证银行与支付账户，可过 KYC。',subs:[{id:'bank-personal',en:'Personal Accounts',cn:'个人账户'},{id:'bank-payment',en:'Payment Accounts',cn:'支付账户'}]},
+{id:'crypto',icon:'🪙',en:'Crypto Exchange Accounts',cn:'加密货币交易所',desc_en:'Verified exchange accounts and P2P merchant setups.',desc_cn:'认证交易所账户与 P2P 商家配置。',subs:[{id:'cr-verified',en:'Verified Accounts',cn:'认证账号'},{id:'cr-p2p',en:'P2P Merchants',cn:'P2P 商家'}]},
+{id:'social',icon:'🌍',en:'Other Social Media',cn:'其他社交媒体',desc_en:'Instagram, X, YouTube, Discord, Reddit and more.',desc_cn:'Instagram、X、YouTube、Discord、Reddit 等。',subs:[{id:'so-instagram',en:'Instagram',cn:'Instagram'},{id:'so-x',en:'X / Twitter',cn:'X / 推特'},{id:'so-youtube',en:'YouTube',cn:'YouTube'},{id:'so-discord',en:'Discord & Reddit',cn:'Discord 与 Reddit'}]},
+{id:'bots',icon:'🛠',en:'Bots & Chatbots',cn:'机器人与聊天机器人',desc_en:'Custom Telegram bots, AI chat agents, automation.',desc_cn:'定制 Telegram 机器人、AI 客服与自动化。',subs:[{id:'bot-custom',en:'Custom Bots',cn:'定制机器人'},{id:'bot-ai',en:'AI Chat Agents',cn:'AI 客服'}]},
+{id:'cloud',icon:'☁️',en:'Cloud Control & Mass Messaging',cn:'云控与群发',desc_en:'Phone farms, cloud senders, bulk delivery panels.',desc_cn:'云控设备、群发平台与批量发送面板。',subs:[{id:'cl-sender',en:'Mass Senders',cn:'群发工具'},{id:'cl-farm',en:'Cloud Phone Farms',cn:'云控机房'}]},
+{id:'premium',icon:'💎',en:'Premium & Subscriptions',cn:'会员与订阅',desc_en:'Streaming, design and productivity subscriptions.',desc_cn:'影音、设计效率类订阅。',subs:[{id:'pr-stream',en:'Streaming',cn:'影音订阅'},{id:'pr-pro',en:'Pro Tools',cn:'专业工具'}]},
+{id:'other',icon:'📦',en:'More Services',cn:'更多服务',desc_en:'Anything else you need — ask support.',desc_cn:'其他需求，联系客服。',subs:[{id:'ot-custom',en:'Custom Orders',cn:'定制订单'}]}
+];
+const SEED_ITEMS = [
+{id:'it101',cat:'telegram',sub:'tg-premium',name:'Telegram Premium — 12 months',desc:'Full Telegram Premium on your own account: 4 GB uploads, faster downloads, voice-to-text, exclusive stickers, no ads. Activated by our team within minutes; nothing to install.',price:24.99,stock:48,delivery:'Instant — under 10 minutes',icon:'✈️'},
+{id:'it102',cat:'telegram',sub:'tg-members',name:'Telegram Members — 1000 real',desc:'1000 genuine members added to your channel or group, drip-fed over 3 days so it looks natural. No bots. 30-day refill warranty.',price:8.5,stock:120,delivery:'Start within 1 hour',icon:'✈️'},
+{id:'it103',cat:'telegram',sub:'tg-accounts',name:'Aged Telegram Account — 2019/2022',desc:'Aged accounts with real history, no bans, phone confirmed, ready for automation or business use. Login details delivered as a text file.',price:3.2,stock:64,delivery:'Instant',icon:'✈️'},
+{id:'it104',cat:'whatsapp',sub:'wa-accounts',name:'WhatsApp Business Account — verified',desc:'Freshly registered business account with a working number, ready for the API or the app. Comes with the number and the 2FA code.',price:12,stock:9,delivery:'Instant',icon:'💬'},
+{id:'it201',cat:'giftcards',sub:'gc-steam',name:'Steam Gift Card — $50',desc:'Redeemable in any region supported by Steam. Code delivered instantly, region stated on the code file. No chargeback, warranty till redeemed.',price:47,stock:22,delivery:'Instant',icon:'🎮'},
+{id:'it202',cat:'giftcards',sub:'gc-itunes',name:'iTunes / Apple Gift Card — $100',desc:'US region Apple gift card. Add to your Apple ID balance and buy apps, iCloud or Apple Music.',price:94,stock:15,delivery:'Instant',icon:'🍏'},
+{id:'it301',cat:'software',sub:'sw-tools',name:'Bulk Account Manager Pro — lifetime',desc:'Desktop tool for managing hundreds of social accounts from one window with proxies, warm-up schedules and export. Lifetime licence, 1 PC.',price:39,stock:31,delivery:'Instant licence key',icon:'💻'},
+{id:'it401',cat:'backends',sub:'be-shop',name:'Crypto Exchange Backend + Mini App',desc:'Full source: Node backend, admin panel, Telegram mini app front end, KYC hooks and payment gateway stubs. Deployed for you on request.',price:299,stock:5,delivery:'24 hours after payment',icon:'🧩'},
+{id:'it501',cat:'data',sub:'data-leads',name:'Verified Lead List — 10,000 records',desc:'10k cleaned, de-duplicated business leads in your niche with name, email, site and phone. CSV delivery, GDPR-scrubbed fields.',price:65,stock:12,delivery:'Within 6 hours',icon:'🗂'},
+{id:'it601',cat:'tiktok',sub:'tt-growth',name:'TikTok Followers — 5000',desc:'Real-looking followers delivered gradually over 48 hours to protect reach. No password needed, just your username. 60-day refill.',price:18,stock:40,delivery:'Start within 30 minutes',icon:'🎵'},
+{id:'it701',cat:'numbers',sub:'num-sms',name:'SMS Verification — any platform',desc:'Receive the code on a temporary number for Telegram, WhatsApp, Discord, Tinder, Amazon and more. 20 minutes of rental included.',price:1.4,stock:500,delivery:'Instant',icon:'📱'},
+{id:'it801',cat:'ai',sub:'ai-chat',name:'ChatGPT Plus — 1 month',desc:'Full ChatGPT Plus on your own email: GPT-5 class models, image generation, file analysis, faster responses. Warranty for the whole month.',price:16.5,stock:26,delivery:'Under 15 minutes',icon:'🤖'},
+{id:'it802',cat:'ai',sub:'ai-image',name:'Midjourney — 1 month basic',desc:'Midjourney subscription activated on your Discord account with 200 generations and relax mode.',price:11,stock:14,delivery:'Under 30 minutes',icon:'🎨'},
+{id:'it901',cat:'facebook',sub:'fb-accounts',name:'Facebook Aged Account — 2016-2020',desc:'Aged profiles with friends and history, email confirmed, no restrictions. Ideal for advertising and marketplace.',price:6.5,stock:38,delivery:'Instant',icon:'📘'},
+{id:'it1001',cat:'crypto',sub:'cr-verified',name:'Verified Exchange Account — KYC done',desc:'Fully KYC-verified exchange account with email and 2FA handed over. Region and limits stated on delivery.',price:120,stock:7,delivery:'Within 12 hours',icon:'🪙'},
+{id:'it1101',cat:'social',sub:'so-instagram',name:'Instagram Account — 5k followers',desc:'Established Instagram profile with 5k organic-looking followers, bio and 20 posts. Email included.',price:22,stock:11,delivery:'Instant',icon:'🌍'},
+{id:'it1201',cat:'bots',sub:'bot-custom',name:'Custom Telegram Bot — built for you',desc:'A bot built to your spec: shops, subscriptions, referral systems, admin panels. Includes hosting setup and 30 days of fixes.',price:149,stock:10,delivery:'3-5 days',icon:'🛠'},
+{id:'it1301',cat:'cloud',sub:'cl-sender',name:'Mass Messaging Panel — 1 month',desc:'Cloud sender with rotating numbers, delivery reports and anti-ban pacing. Panel access for 30 days, unlimited campaigns.',price:59,stock:18,delivery:'Within 2 hours',icon:'☁️'}
+];
 (function seed(){
 if(!S.cats) { S.cats = SEED_CATS; }
 if(!S.items){ S.items = SEED_ITEMS.map(x => Object.assign({active:true}, x)); }
@@ -342,7 +379,7 @@ function ds(c){ return LANG === 'cn' ? (c.desc_cn || c.desc_en) : (c.desc_en || 
 </script>
 <script>
 let TAB = 'home';
-let MARKET = {cat:null, sub:null, q:''};
+let MARKET = {cat:null, cont:null, sub:null, q:''};
 function go(tab){
 TAB = tab; closeSheet(); haptic('light');
 if(tab === 'admin' && S.user){ S.user.role = roleFor(S.user); }
@@ -464,10 +501,20 @@ if(MARKET.cat){
 const c = catOf(MARKET.cat);
 h += '<div class="back" onclick="MARKET.cat=null;MARKET.sub=null;render()">← ' + t('back') + '</div>';
 h += '<div class="card glowline" style="margin-bottom:12px"><div style="display:flex;gap:12px;align-items:center"><div class="ic" style="width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,rgba(139,92,246,.28),rgba(34,211,238,.18));border:1px solid var(--line2)">' + (c.icon||'📦') + '</div><div><h3 style="margin:0">' + esc(nm(c)) + '</h3><div class="mini">' + esc(ds(c)||'') + '</div></div></div></div>';
-if((c.subs||[]).length){
+if((c.conts||[]).length){
+h += '<div class="chips">';
+h += '<div class="chip' + (!MARKET.cont?' on':'') + '" onclick="MARKET.cont=null;MARKET.sub=null;render()">' + t('all') + '</div>';
+(c.conts||[]).forEach(k => {
+h += '<div class="chip' + (MARKET.cont===k.id?' on':'') + '" onclick="MARKET.cont=\'' + k.id + '\';MARKET.sub=null;render()">' + (k.icon||'') + ' ' + esc(nm(k)) + '</div>';
+});
+h += '</div>';
+}
+var subsList = (c.subs||[]);
+if(MARKET.cont) subsList = subsList.filter(s => s.cont === MARKET.cont);
+if(subsList.length){
 h += '<div class="chips">';
 h += '<div class="chip' + (!MARKET.sub?' on':'') + '" onclick="MARKET.sub=null;render()">' + t('all') + '</div>';
-(c.subs||[]).forEach(s => {
+subsList.forEach(s => {
 h += '<div class="chip' + (MARKET.sub===s.id?' on':'') + '" onclick="MARKET.sub=\'' + s.id + '\';render()">' + esc(nm(s)) + '</div>';
 });
 h += '</div>';
@@ -488,6 +535,7 @@ const box = document.getElementById('mlist'); if(!box) return;
 const q = (MARKET.q||'').toLowerCase();
 let list = (S.items||[]).filter(i => i.active !== false);
 if(MARKET.cat) list = list.filter(i => i.cat === MARKET.cat);
+if(MARKET.cont) list = list.filter(i => i.cont === MARKET.cont);
 if(MARKET.sub) list = list.filter(i => i.sub === MARKET.sub);
 if(q) list = list.filter(i => (i.name||'').toLowerCase().includes(q) || (i.desc||'').toLowerCase().includes(q));
 if(!list.length){ box.innerHTML = '<div class="empty"><span class="e">🗃</span>' + t('noItems') + '</div>'; return; }
@@ -504,7 +552,7 @@ return;
 }
 box.innerHTML = list.map((it,i) => prodCard(it,i)).join('');
 }
-function openCat(id){ MARKET.cat = id; MARKET.sub = null; MARKET.q = ''; TAB='market'; haptic('light'); render(); window.scrollTo({top:0}); }
+function openCat(id){ MARKET.cat = id; MARKET.cont = null; MARKET.sub = null; MARKET.q = ''; TAB='market'; haptic('light'); render(); window.scrollTo({top:0}); }
 let PQTY = 1, PCUR = null;
 function openProduct(id){
 PCUR = id; PQTY = 1; TAB = 'product'; haptic('light'); render(); window.scrollTo({top:0});
@@ -1760,6 +1808,11 @@ loadPublicMembers();
 </script>
 <script>
 (function(){
+function hideErr(){
+var b = document.getElementById('bootErr');
+if(b){ b.parentNode.removeChild(b); }
+}
+window.hideBootErr = hideErr;
 function showErr(msg){
 var v = document.getElementById('view');
 if(v && v.innerHTML.replace(/\s/g,'').length > 0) return;
@@ -1767,14 +1820,19 @@ if(document.getElementById('bootErr')) return;
 var box = document.createElement('div');
 box.id = 'bootErr';
 box.style.cssText = 'position:fixed;left:12px;right:12px;top:64px;z-index:999;background:#200d16;border:1px solid #fb7185;border-radius:14px;padding:14px;color:#fff;font-size:13px;line-height:1.5;font-family:system-ui,sans-serif';
-box.innerHTML = '<b>⚠️ The shop could not be drawn</b><div style="margin-top:6px;color:#fda4af;font-size:12px">' + String(msg).replace(/</g,'&lt;') + '</div><div style="margin-top:8px;color:#94a3b8;font-size:11px">Send /getapp in the bot and re-upload the new index.html.</div>';
+box.innerHTML = '<b>⚠️ The shop could not be drawn</b><div style="margin-top:6px;color:#fda4af;font-size:12px">' + String(msg).replace(/</g,'&lt;') + '</div><div style="margin-top:8px;color:#94a3b8;font-size:11px">Send /getapp in the bot and re-upload the new index.html.</div><div style="margin-top:10px"><button onclick="hideBootErr()" style="background:transparent;border:1px solid #fb7185;color:#fda4af;border-radius:9px;padding:6px 12px;font-size:12px">✕ Close</button></div>';
 document.body.appendChild(box);
 }
 window.addEventListener('error', function(e){ showErr(e && e.message ? e.message : 'script error'); });
-setTimeout(function(){
+var tries = 0;
+function check(){
+tries++;
 var v = document.getElementById('view');
-if(!v || v.innerHTML.replace(/\s/g,'').length === 0){ showErr('No content was rendered.'); }
-}, 2500);
+if(v && v.innerHTML.replace(/\s/g,'').length > 0){ hideErr(); return; }
+if(tries >= 6){ showErr('No content was rendered.'); return; }
+setTimeout(check, 2000);
+}
+setTimeout(check, 4000);
 })();
 </script>
 </body>
