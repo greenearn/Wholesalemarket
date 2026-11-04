@@ -252,7 +252,7 @@ function toggleTheme(){ const h=document.documentElement; const n = h.getAttribu
 </script>
 <script>
 const CFG = {
-API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6v_kRzz_1tbDuHYhJct1wTdlI3p_2FY-DEmdUHuJdNE6X6v7bl7ITOYVbH8U1VJU7Q4EGxizd3QEZ97FcOW7vmhqKT0L5yD9i_axVGL_oTax7FpcO0smDnypS4rGfhXMs2h3CJn_amt89UlNrsGpD78XWsSsPjslrCOVhvkGrNMXsRQaowCyJmqzUXkZ80kjdrJZ",    
+API: window.WM_API || "https://api.telebotcreator.com/new-webhook?data=gAAAAABq6wXbnpkcHYRPb9vfX7r8OdrcPGe12XkjsA1bTXEUM3_oJtNZ749ZamRD41RZQBs2lJ7iDRcQisnPVO6pxsh2_XgIrqQ4DhI1xwDdf53UQKCk6Uo6jAv0cibSm_AhFBrQna5RXPFVfCmpWj2I5KqMocdifM-J8iecmaXntc9qO8fSWLq-F41CrArRjkIiTLrqOkHC",    
 BOT: "wholesalemarketworldwideV2bot",
 SUPPORT: "Esimbuywithcrypto",
 ADMIN_ID: "7417254569",
@@ -449,7 +449,11 @@ const c = catOf(it.cat);
 let h = '<div class="prod" style="animation-delay:' + ((i||0)*45) + 'ms;margin-bottom:10px" onclick="openProduct(\'' + it.id + '\')">';
 h += '<div class="thumb">' + (it.icon || c.icon || '📦') + '</div><div style="min-width:0;flex:1">';
 h += '<div class="nm">' + esc(it.name) + '</div>';
-h += '<div class="mt">' + tag + '<span>' + esc(nm(c)) + '</span></div></div>';
+h += '<div class="mt">' + tag;
+if(it.flag || it.code){
+h += '<span style="font-weight:700;letter-spacing:.02em">' + esc(String(it.flag||'') + ' ' + String(it.code||'')) + '</span>';
+}
+h += '<span>' + esc(nm(c)) + '</span></div></div>';
 h += '<div class="price"><b>' + money(p) + '</b>' + (p !== base ? '<s>' + money(base) + '</s>' : '') + '</div></div>';
 return h;
 }
@@ -515,6 +519,9 @@ let h = '<section>';
 h += '<div class="back" onclick="openCat(\'' + it.cat + '\')">← ' + t('back') + '</div>';
 h += '<div class="thumbbig">' + (it.icon || c.icon || '📦') + '</div>';
 h += '<span class="badge">' + esc(nm(c)) + '</span>';
+if(it.flag || it.code){
+h += ' <span class="badge" style="font-weight:700">' + esc(String(it.flag||'') + ' ' + String(it.code||'')) + (it.country ? ' · ' + esc(String(it.country)) : '') + '</span>';
+}
 h += '<h1 style="font-size:21px;margin:10px 0 6px">' + esc(it.name) + '</h1>';
 h += '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px"><span style="font-size:26px;font-weight:800">' + money(p) + '</span>';
 if(p !== base) h += '<s class="mini">' + money(base) + '</s>';
